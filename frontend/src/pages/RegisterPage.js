@@ -27,15 +27,17 @@ const RegisterPage = () => {
             console.log("response:", values.email);
 
             if (response.status_code === 201) {
-                message.success("Đăng ký thành công!");
                 
                 // Chỉ khi register thành công mới gửi verification code
                 console.log("Sending verification code to:", values.email);
                 await userService.sendVerificationCode({ email: values.email });
                 
+                message.success("Đăng ký thành công!");
                 // Navigate to verify page
                 navigate("/verify-code", {
-                    state: { email: values.email },
+                    state: { email: values.email,
+                        message: "Xác nhận Email",
+                     },
                 });
             }
             // Chuyển hướng đến trang dashboard

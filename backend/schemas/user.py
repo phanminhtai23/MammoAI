@@ -64,3 +64,12 @@ class SendVerificationCode(BaseModel):
 class VerifyCode(BaseModel):
     email: EmailStr
     code: str
+
+
+class VerifyResetToken(BaseModel):
+    token: str
+
+class ResetPassword(BaseModel):
+    token: str
+    new_password: str
+    confirm_password: str

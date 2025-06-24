@@ -4,6 +4,7 @@ from fastapi import Depends, HTTPException
 from passlib.context import CryptContext
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.openapi.models import OAuthFlowPassword
+from utils.jwt import verify_access_token
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,16 +22,18 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    # payload = await verify_access_token(token)
-    payload = 1
+    payload = await verify_access_token(token)
     if payload is None:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-    
-    
-    
-    # print("payload: ", payload)
-    # return payload
+        return None
+    else:
+        print("payload: ", payload)
+        return payload
 
+def check_admin_role(user: dict):
+    if user["role"] == "admin":
+        return True
+    else:
+        return False
 
 
 

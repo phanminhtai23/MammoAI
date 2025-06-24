@@ -44,6 +44,21 @@ const userService = {
     verify_token: () => {
         return axiosClient.get("/user/verify-token");
     },
+
+    // Forgot password
+    forgotPassword: (data) => {
+        return axiosClient.post("/user/forgot-password", data);
+    },
+
+    // Verify reset token
+    verifyResetToken: (data) => {
+        return axiosClient.post("/user/check-token", data);
+    },
+
+    // Reset password
+    resetPassword: (data) => {
+        return axiosClient.post("/user/reset-password", data);
+    },
 };
 
 export default userService;

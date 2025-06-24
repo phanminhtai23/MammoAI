@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 from database import users_collection, users_session_collection
-from schemas.user import UserRegister, LoginRequest, UserUpdate, UserResponse, SendVerificationCode, VerifyCode
-from utils.security import hash_password, verify_password, get_current_user
-from utils.jwt import create_access_token
+from schemas.user import UserRegister, LoginRequest, UserUpdate, UserResponse, SendVerificationCode, VerifyCode, VerifyResetToken, ResetPassword
+from utils.security import hash_password, verify_password, get_current_user, check_admin_role
+from utils.jwt import create_access_token, verify_access_token
 from fastapi.encoders import jsonable_encoder
 import uuid
 from datetime import datetime, timezone, timedelta  # Thêm timedelta vào import
 from database import verification_codes_collection
-from utils.send_mail import send_verification_email, generate_verification_code
-from config import VERIFICATION_CODE_EXPIRE_MINUTES
+from utils.send_mail import send_verification_email, generate_verification_code, send_forgot_password_email
+from config import VERIFICATION_CODE_EXPIRE_MINUTES, FRONTEND_URL
 
 router = APIRouter()
 
@@ -156,6 +156,7 @@ async def login(user: LoginRequest):
     # Tìm user bằng email
     db_user = await users_collection.find_one({"email": user.email})
     
+    # Kiểm tra tài khoản có tồn tại không
     if not db_user:
         raise HTTPException(
             status_code=404, 
@@ -175,7 +176,15 @@ async def login(user: LoginRequest):
             status_code=401, 
             detail="Sai tài khoản hoặc mật khẩu"
         )
-    
+
+
+    # Kiểm tra tài khoản có xác thực không
+    if not db_user.get("confirmed", False):
+        raise HTTPException(
+            status_code=403,
+            detail="Tài khoản chưa xác thực"
+        )
+
     # Tạo access token
     access_token, created_at, expires_at = create_access_token(
         data={
@@ -193,15 +202,43 @@ async def login(user: LoginRequest):
             "id": db_user["id"],
             "email": db_user["email"],
             "name": db_user["name"],
-            "role": db_user["role"]
+            "role": db_user["role"],
+            "confirmed": db_user["confirmed"]
         }
     }
 
+
+@router.post("/forgot-password")
+async def forgot_password(data: SendVerificationCode):
+    """
+    Quên mật khẩu
+    """
+    # Kiểm tra email có tồn tại không
+    db_user = await users_collection.find_one({"email": data.email})
+
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Email chưa đăng ký tài khoản")
+    
+    token, created_at, expires_at = create_access_token(
+        data={
+            "sub": db_user["email"],
+            "user_id": db_user["id"],
+        }
+    )
+
+    reset_password_url = f"{FRONTEND_URL}/reset-password?token={token}"
+    print("reset_password_url:", reset_password_url)
+    send_forgot_password_email(data.email, token, expires_at, reset_password_url)
+
+    return {"status": 200, "message": "Email đã được gửi đến"}
 
 @router.get("/")
 async def get_all_users(user: dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+    if not check_admin_role(user):
+        raise HTTPException(status_code=403, detail="You do not have permission to access this resource")
 
     users = await users_collection.find({"role": "user"}).to_list()
     valid_users = []
@@ -217,6 +254,7 @@ async def get_all_users(user: dict = Depends(get_current_user)):
             print(f"Missing key: {e}, skipping invalid user: {user}")
 
     return {"message": "Got users successfully", "users": valid_users}
+
 
 
 # @router.post("/logout")
@@ -243,11 +281,52 @@ async def get_all_users(user: dict = Depends(get_current_user)):
 
 
 @router.get("/verify-token")
-async def logout(user: dict = Depends(get_current_user)):
+async def verify_token(user: dict = Depends(get_current_user)):
     # Kiểm tra xem người dùng đã đăng nhập hay chưa
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return {"status": 200, "message": "Token hợp lệ"}
+
+@router.post("/check-token")
+async def check_token(token: VerifyResetToken):
+    """
+    Kiểm tra token còn hạn không và trả về payload
+    """
+    payload = await verify_access_token(token.token)
+    # print("voddaayyyyyyyyyy", payload)
+    if payload is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Token không hợp lệ hoặc đã hết hạn"
+        )
+    # Nếu decode thành công, token còn hạn
+    return {
+        "status": 200,
+        "message": "Token còn hạn",
+        "payload": payload
+    }
+        
+@router.post("/reset-password")
+async def reset_password(data: ResetPassword):
+    """
+    Đặt lại mật khẩu
+    """
+    payload = await verify_access_token(data.token)
+    if payload is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Token không hợp lệ hoặc đã hết hạn"
+        )
+    
+    try:
+    # Cập nhật lại mật khẩu cho user
+        await users_collection.update_one({"id": payload["user_id"]}, {"$set": {"password_hash": hash_password(data.new_password)}})
+        return {"status": 200, "message": "Mật khẩu đã được đặt lại thành công"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail="Lỗi khi đặt lại mật khẩu"
+        )
 
 
 @router.delete("/delete/{userEmail}")

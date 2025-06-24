@@ -8,6 +8,7 @@ DATABASE_NAME = os.getenv("DATABASE_NAME")
 SECRET_KEY = os.getenv("SECRET_KEY")
 HOST = os.getenv("HOST")
 PORT = os.getenv("PORT")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")

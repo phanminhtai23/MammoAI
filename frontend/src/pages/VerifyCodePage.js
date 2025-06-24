@@ -24,7 +24,7 @@ const VerifyCodePage = () => {
     const email =
         location.state?.email ||
         "";
-
+    const msg = location.state?.message || "";
     // Đếm ngược cho nút gửi lại mã
     useEffect(() => {
         let timer;
@@ -81,12 +81,18 @@ const VerifyCodePage = () => {
         const code = verificationCode.join("");
 
         if (code.length !== 6) {
-            message.warning("Vui lòng nhập đầy đủ 6 chữ số!");
+            message.warning({
+                content: "Vui lòng nhập đầy đủ 6 chữ số!",
+                duration: 2,
+            });
             return;
         }
 
         if (!email) {
-            message.error("Không tìm thấy email. Vui lòng đăng ký lại!");
+            message.error({
+                content: "Không tìm thấy email. Vui lòng đăng ký lại!",
+                duration: 2,
+            });
             navigate("/register");
             return;
         }
@@ -99,7 +105,7 @@ const VerifyCodePage = () => {
             if (response.status === 200) {
                 message.success(
                     {
-                        content: "Xác nhận thành công! Chào mừng bạn đến với hệ thống!",
+                        content: "Xác nhận thành công! Vui lòng đăng nhập để vào hệ thống!",
                         duration: 2,
                     }
                 );
@@ -113,7 +119,10 @@ const VerifyCodePage = () => {
                 });
             }
         } catch (error) {
-            message.error(error.response.data.detail);
+            message.error({
+                content: error.response.data.detail,
+                duration: 2,
+            });
             // console.error("Lỗi xác nhận:", error);
         } finally {
             setLoading(false);
@@ -131,7 +140,10 @@ const VerifyCodePage = () => {
 
             if (response.status === 200) {
                 message.success(
-                    "Mã xác nhận mới đã được gửi đến email của bạn!"
+                    {
+                        content: "Mã xác nhận mới đã được gửi đến email của bạn!",
+                        duration: 2,
+                    }
                 );
 
                 // Reset countdown
@@ -146,7 +158,10 @@ const VerifyCodePage = () => {
                 if (firstInput) firstInput.focus();
             }
         } catch (error) {
-            message.error(error.response.data.detail);
+            message.error({
+                content: error.response.data.detail,
+                duration: 2,
+            });
 
             console.error("Lỗi gửi lại mã:", error);
         } finally {
@@ -173,7 +188,7 @@ const VerifyCodePage = () => {
                             <MailOutlined className="text-blue-600 text-2xl" />
                         </div>
                         <h2 className="text-3xl font-bold text-gray-800">
-                            Xác Nhận Email
+                            {msg}
                         </h2>
                         <p className="text-gray-500 mt-2">
                             Chúng tôi đã gửi mã xác nhận 6 chữ số đến

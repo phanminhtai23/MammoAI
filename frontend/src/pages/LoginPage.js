@@ -28,25 +28,36 @@ const LoginPage = () => {
             });
 
             console.log("respon:", response);
+                
             // Lưu token vào localStorage
-            localStorage.setItem("token", response.access_token);
-
+            localStorage.setItem("token", response.data.access_token);
             // Chuyển hướng đến trang dashboard
-            navigate("/dashboard");
+            if (response.data.user.role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/home");
+            }
+
         } catch (error) {
+
+            if (error.response.status === 403 && error.response.data.detail === "Tài khoản chưa xác thực") {
+                await userService.sendVerificationCode({ email: values.email });
+
+                navigate("/verify-code", {
+                    state: { email: values.email,
+                        message: "Tài khoản chưa xác thực",
+                        confirmed: false
+                    },
+                });
+                return;
+            }
+
             // Xử lý các loại lỗi và hiển thị popup
             let msg = "Đăng nhập thất bại";
-            console.log("respon:", error.response);
-
+            console.log("error:", error.response.data.message);
             if (error.response) {
                 // Lỗi từ server
-                if (error.response.status === 401) {
-                    msg = error.response.data.detail || "Sai tên đăng nhập hoặc mật khẩu";
-                        
-                        
-                } else if (error.response.status === 404) {
-                    msg = error.response.data.detail || "Email chưa được đăng ký";
-                }
+                msg = error.response.data.message;
             } else if (error.request) {
                 // Lỗi kết nối
                 msg = "Không thể kết nối đến máy chủ";
@@ -54,15 +65,12 @@ const LoginPage = () => {
 
             // Hiển thị popup thông báo lỗi
             // Hiển thị popup ở góc trên bên trái trong 3s
-            console.log("Error message:", msg);
-            message.warning({
+            message.error({
                 // type: "error",
                 content: msg,
                 duration: 2,
-                // style: { position: "fixed", top: "20px", left: "20px" },
             });
 
-            console.error("Lỗi đăng nhập:", error);
         } finally {
             setLoading(false);
         }
@@ -183,7 +191,7 @@ const LoginPage = () => {
 
                         <div className="flex justify-between items-center mb-6">
                             <Link
-                                to="/admin/forgot-password"
+                                to="/forgot-password"
                                 className="text-blue-600 hover:text-blue-800 transition"
                             >
                                 Quên mật khẩu?

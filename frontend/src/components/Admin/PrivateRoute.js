@@ -35,10 +35,10 @@ const PrivateRoute = ({ children }) => {
 
     // Hiển thị thông báo khi trạng thái thay đổi
     useEffect(() => {
-        // if (isAuthenticated === false && !hasShownWarningMessage) {
-        //     message.warning("Bạn cần đăng nhập lại !");
-        //     hasShownWarningMessage = true;
-        // }
+        if (isAuthenticated === false && !hasShownWarningMessage) {
+            message.warning("Vui lòng đăng nhập lại !");
+            hasShownWarningMessage = true;
+        }
 
         if (isAuthenticated === true && !hasShownSuccessMessage) {
             message.success("Đăng nhập thành công !");
@@ -50,9 +50,9 @@ const PrivateRoute = ({ children }) => {
         return <LoadingPage />;
     }
 
-    // if (!isAuthenticated) {
-    //     return <Navigate to="/login" />;
-    // }
+    if (!isAuthenticated) {
+        return <Navigate to="/login" />;
+    }
 
     return children;
 };
