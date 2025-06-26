@@ -7,18 +7,38 @@ from routes.rout_email import router as email_router
 import uvicorn
 from config import HOST, PORT
 from fastapi.middleware.cors import CORSMiddleware
+from config import FRONTEND_URL
 
 origins = [
     "http://localhost.tiangolo.com",
     "https://localhost.tiangolo.com",
     "http://localhost",
     "http://127.0.0.1",
+    "https://localhost",
+    "https://127.0.0.1",
     "http://127.0.0.1:3001",
-    "http://localhost:3001",
     "http://127.0.0.1:3002",
     "http://127.0.0.1:3003",
     "http://127.0.0.1:3004",
     "http://127.0.0.1:3005",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "http://localhost:3003",
+    "http://localhost:3004",
+    "http://localhost:3005",
+    "http://localhost:3006",
+    "https://127.0.0.1:3001",
+    "https://127.0.0.1:3002",
+    "https://127.0.0.1:3003",
+    "https://127.0.0.1:3004",
+    "https://127.0.0.1:3005",
+    "https://localhost:3001",
+    "https://localhost:3002",
+    "https://localhost:3003",
+    "https://localhost:3004",
+    "https://localhost:3005",
+    "https://localhost:3006",
+    FRONTEND_URL,
 ]
 
 app = FastAPI()

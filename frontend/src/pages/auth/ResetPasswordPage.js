@@ -9,7 +9,7 @@ import {
     CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import userService from "../services/userService";
+import userService from "../../services/userService";
 
 const ResetPasswordPage = () => {
     const navigate = useNavigate();
@@ -112,7 +112,6 @@ const ResetPasswordPage = () => {
             } else {
                 message.error("Có lỗi xảy ra! Vui lòng thử lại.");
             }
-            
         } finally {
             setSubmitLoading(false);
         }

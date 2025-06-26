@@ -266,7 +266,7 @@ def send_verification_email(receiver_emails, verification_code, expires_at):
                 <!-- Footer -->
                 <div class="footer">
                     <div class="footer-text">
-                        <strong>BreastCancerPrediction</strong> - Công nghệ AI hỗ trợ chẩn đoán sớm
+                        <strong>MammoAI</strong> - Công nghệ AI hỗ trợ chẩn đoán sớm
                     </div>
                     
                     <div class="social-links">
@@ -276,9 +276,9 @@ def send_verification_email(receiver_emails, verification_code, expires_at):
                     </div>
                     
                     <div class="company-info">
-                        © 2025 BreastCancerPrediction. Tất cả quyền được bảo lưu.<br>
+                        © 2025 MammoAI. Tất cả quyền được bảo lưu.<br>
                         Email này được gửi tự động, vui lòng không reply.<br>
-                        🏥 Phát triển bởi phanminhtai23@gmail.com
+                        🏥 Phát triển bởi Phan Minh Tai
                     </div>
                 </div>
             </div>
@@ -326,7 +326,7 @@ def send_forgot_password_email(receiver_emails, token, expires_at, reset_passwor
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Mã Xác Thực - MammoAI</title>
+            <title>Đặt lại mật khẩu - MammoAI</title>
             <style>
                 * {{
                     margin: 0;
@@ -555,7 +555,7 @@ def send_forgot_password_email(receiver_emails, token, expires_at, reset_passwor
                 <!-- Footer -->
                 <div class="footer">
                     <div class="footer-text">
-                        <strong>BreastCancerPrediction</strong> - Công nghệ AI hỗ trợ chẩn đoán sớm
+                        <strong>MammoAI</strong> - Công nghệ AI hỗ trợ chẩn đoán sớm
                     </div>
                     
                     <div class="social-links">
@@ -565,9 +565,9 @@ def send_forgot_password_email(receiver_emails, token, expires_at, reset_passwor
                     </div>
                     
                     <div class="company-info">
-                        © 2025 BreastCancerPrediction. Tất cả quyền được bảo lưu.<br>
+                        © 2025 MammoAI. Tất cả quyền được bảo lưu.<br>
                         Email này được gửi tự động, vui lòng không reply.<br>
-                        🏥 Phát triển bởi phanminhtai23@gmail.com
+                        🏥 Phát triển bởi Phan Minh Tai
                     </div>
                 </div>
             </div>
@@ -578,7 +578,7 @@ def send_forgot_password_email(receiver_emails, token, expires_at, reset_passwor
     # Create MIMEText object
     message = MIMEMultipart("alternative")
     message = MIMEText(html, "html")
-    message["Subject"] = f"[MammoAI] Mã xác thực tài khoản "
+    message["Subject"] = f"[MammoAI] Đặt lại mật khẩu "
     message["From"] = sender_email
     # Join the list of receiver emails into a string separated by commas
     message["To"] = receiver_emails

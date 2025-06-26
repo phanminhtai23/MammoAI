@@ -15,11 +15,12 @@ const PrivateRoute = ({ children }) => {
             const token = localStorage.getItem("token");
             if (!token) {
                 setIsAuthenticated(false);
+                // setIsAuthenticated(true);
                 return;
             }
 
             try {
-                let response = await userService.verify_token();
+                let response = await userService.verifyResetToken({token: token});
                 if (response.status !== 200) {
                     setIsAuthenticated(false);
                     return;
@@ -42,7 +43,7 @@ const PrivateRoute = ({ children }) => {
 
         if (isAuthenticated === true && !hasShownSuccessMessage) {
             message.success("Đăng nhập thành công !");
-            hasShownSuccessMessage = true;
+            hasShownSuccessMessage = true;  
         }
     }, [isAuthenticated]);
 

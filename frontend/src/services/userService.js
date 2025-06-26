@@ -41,10 +41,6 @@ const userService = {
         return axiosClient.post("/user/verify-code", data);
     },
 
-    verify_token: () => {
-        return axiosClient.get("/user/verify-token");
-    },
-
     // Forgot password
     forgotPassword: (data) => {
         return axiosClient.post("/user/forgot-password", data);
@@ -59,6 +55,27 @@ const userService = {
     resetPassword: (data) => {
         return axiosClient.post("/user/reset-password", data);
     },
+
+    // Google login
+    googleLogin: (data) => {
+        return axiosClient.post("/user/google-login", data);
+    },
+
+    // Facebook login
+    facebookLogin: (data) => {
+        return axiosClient.post("/user/facebook-login", data);
+    },
+
+    // Google register
+    googleRegister: (data) => {
+        return axiosClient.post("/user/google-register", data);
+    },
+
+    // Facebook register
+    facebookRegister: (data) => {
+        return axiosClient.post("/user/facebook-register", data);
+    },
+    
 };
 
 export default userService;

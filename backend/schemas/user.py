@@ -1,7 +1,18 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 
+
+class UserSchema(BaseModel):
+    id: str
+    email: Optional[EmailStr]
+    name: str
+    auth_provider: Literal["local", "google", "facebook"] = "local"
+    provider_id: Optional[str] = None
+    isRevoked: bool = False
+    confirmed: bool = False
+    role: str = "user"
+    created_at: datetime
 
 class UserRegister(BaseModel):
     name: str  # Họ tên
@@ -21,6 +32,7 @@ class UserResponse(BaseModel):
     name: str
     auth_provider: Optional[str] = "local"
     provider_id: Optional[str] = None
+    imgUrl: Optional[str] = None
     isRevoked: bool = False
     confirmed: bool = True
     role: str = "user"

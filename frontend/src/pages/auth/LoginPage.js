@@ -8,104 +8,144 @@ import {
     ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
-import userService from "../services/userService";
+import userService from "../../services/userService";
+import { useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "@greatsumini/react-facebook-login";
+
+
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
-    
+
+    // Handle Google login
+    const loginGoogle = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const response = await userService.googleLogin({
+                    token: tokenResponse.access_token,
+                });
+                console.log("response:", response);
+                localStorage.setItem("token", response.data.access_token);
+                if (response.data.user.role === "admin") {
+                    navigate("/dashboard");
+                } else {
+                    navigate("/home");
+                }
+            } catch (error) {
+                console.log("error:", error);
+                // Xử lý các loại lỗi và hiển thị popup
+                let msg = "Đăng nhập thất bại";
+                // sai tài khoản hoặc mật khẩu
+                if (!error.response && error.message) {
+                    // lỗi kết nối
+                    message.error(error.message, 2);
+                } else if (error.response.status) {
+                    // sai tài khoản hoặc mật khẩu hay bị khóa tài khoản
+                    message.error(error.response.data.detail, 2);
+                } else if (error.request) {
+                    // lỗi kết nối
+                    message.error("Lỗi kết nối đến máy chủ", 2);
+                } else {
+                    // lỗi kết nối
+                    message.error("Đăng nhập thất bại", 2);
+                }
+            }
+        },
+        onError: () => {
+            message.error("Google login thất bại", 2);
+        },
+    });
+
+    // Handle Facebook login
+    const handleFacebookLogin = async (res) => {
+        try {
+            
+            // console.log("accessToken:", res);
+            const response = await userService.facebookLogin({
+                token: res.accessToken,
+            });
+            console.log("response:", response);
+
+            localStorage.setItem("token", response.data.access_token);
+            if (response.data.user.role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/home");
+            }
+        } catch (error) {
+            console.log("error:", error);
+            // Xử lý các loại lỗi và hiển thị popup
+            let msg = "Đăng nhập thất bại";
+            // sai tài khoản hoặc mật khẩu
+            if (!error.response && error.message) {
+                msg = error.message; // lỗi kết nối
+            } else if (error.response && error.response.status) {
+                msg = error.response.data.detail; // sai tài khoản hoặc mật khẩu hay bị khóa tài khoản
+            } else if (error.request) {
+                msg = "Lỗi kết nối đến máy chủ";
+            } else {
+                // Hiển thị popup ở góc trên bên trái trong 2s
+                message.error({
+                    // type: "error",
+                    content: msg,
+                    duration: 2,
+                });
+            }
+        }
+    };
 
     const onFinish = async (values) => {
         try {
             setLoading(true);
-            // Gọi API đăng nhập sử dụng userService
             const response = await userService.login({
                 email: values.email,
                 password: values.password,
                 device_info: navigator.userAgent,
             });
 
-            console.log("respon:", response);
-                
-            // Lưu token vào localStorage
             localStorage.setItem("token", response.data.access_token);
-            // Chuyển hướng đến trang dashboard
             if (response.data.user.role === "admin") {
                 navigate("/dashboard");
             } else {
                 navigate("/home");
             }
-
         } catch (error) {
-
-            if (error.response.status === 403 && error.response.data.detail === "Tài khoản chưa xác thực") {
+            let msg = "Đăng nhập thất bại";
+            if (
+                error.response?.status === 403 &&
+                error.response.data.detail === "Tài khoản chưa xác thực"
+            ) {
                 await userService.sendVerificationCode({ email: values.email });
-
                 navigate("/verify-code", {
-                    state: { email: values.email,
+                    state: {
+                        email: values.email,
                         message: "Tài khoản chưa xác thực",
-                        confirmed: false
+                        confirmed: false,
                     },
                 });
                 return;
             }
 
-            // Xử lý các loại lỗi và hiển thị popup
-            let msg = "Đăng nhập thất bại";
-            console.log("error:", error.response.data.message);
-            if (error.response) {
-                // Lỗi từ server
-                msg = error.response.data.message;
-            } else if (error.request) {
-                // Lỗi kết nối
-                msg = "Không thể kết nối đến máy chủ";
+            if (error.response?.data?.detail) {
+                message.error(error.response.data.detail, 2);
+            } else if (error.message) {
+                message.error(error.message, 2);
             }
-
-            // Hiển thị popup thông báo lỗi
-            // Hiển thị popup ở góc trên bên trái trong 3s
-            message.error({
-                // type: "error",
-                content: msg,
-                duration: 2,
-            });
-
+            
         } finally {
             setLoading(false);
         }
     };
 
-    // Đóng popup lỗi
     const handleErrorClose = () => {
         setErrorVisible(false);
     };
 
-    const handleGoogleLogin = async () => {
-        try {
-            // Phần này cần tích hợp với Google OAuth
-            message.info("Đang chuyển hướng đến đăng nhập Google...");
-            navigate("/dashboard");
-        } catch (error) {
-            setErrorMessage("Đăng nhập Google thất bại");
-            setErrorVisible(true);
-        }
-    };
-
-    const handleFacebookLogin = async () => {
-        try {
-            // Phần này cần tích hợp với Facebook OAuth
-            message.info("Đang chuyển hướng đến đăng nhập Facebook...");
-            navigate("/admin/dashboard");
-        } catch (error) {
-            setErrorMessage("Đăng nhập Facebook thất bại");
-            setErrorVisible(true);
-        }
-    };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-300 flex items-center justify-center px-4">
-            {/* Popup thông báo lỗi */}
             <Modal
                 title={
                     <div style={{ display: "flex", alignItems: "center" }}>
@@ -124,12 +164,7 @@ const LoginPage = () => {
                 ]}
                 centered
             >
-                <Alert
-                    message={errorMessage}
-                    type="error"
-                    showIcon
-                    style={{ marginBottom: 0 }}
-                />
+                <Alert message={errorMessage} type="error" showIcon />
             </Modal>
 
             <div className="bg-white shadow-2xl rounded-2xl overflow-hidden w-full max-w-md">
@@ -211,7 +246,7 @@ const LoginPage = () => {
                         </Form.Item>
                     </Form>
 
-                    {/* <div className="relative my-6">
+                    <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
                         </div>
@@ -224,35 +259,36 @@ const LoginPage = () => {
 
                     <div className="space-y-4">
                         <Button
-                            icon={<GoogleOutlined />}
                             block
-                            className="h-12 rounded-lg flex items-center justify-center border border-red-500 text-red-500 hover:bg-red-50 transition"
-                            onClick={handleGoogleLogin}
+                            onClick={() => loginGoogle()}
+                            className="h-12 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 transition flex items-center justify-center bg-white"
+                            icon={<GoogleOutlined />}
                         >
-                            Đăng Nhập với Google
+                            Đăng nhập bằng Google
                         </Button>
 
-                        <Button
-                            icon={<FacebookOutlined />}
-                            block
-                            className="h-12 rounded-lg flex items-center justify-center border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
-                            onClick={handleFacebookLogin}
-                        >
-                            Đăng Nhập với Facebook
-                        </Button>
+                        <FacebookLogin
+                            appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                            autoLoad={false}
+                            fields="name,email,picture"
+                            // callback={handleFacebookLogin}
+                            onSuccess={(res) => {
+                                handleFacebookLogin(res);
+                            }}
+                            render={(renderProps) => (
+                                <Button
+                                    block
+                                    className="h-12 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition flex items-center justify-center bg-white"
+                                    onClick={renderProps.onClick}
+                                    disabled={renderProps.disabled}
+                                    icon={<FacebookOutlined />}
+                                >
+                                    Đăng nhập bằng Facebook
+                                </Button>
+                            )}
+                        />
                     </div>
 
-                    <div className="text-center mt-6">
-                        <p className="text-gray-600">
-                            Chưa có tài khoản?{" "}
-                            <Link
-                                to="/admin/auth/register"
-                                className="text-blue-600 hover:text-blue-800 font-semibold transition"
-                            >
-                                Đăng ký ngay
-                            </Link>
-                        </p>
-                    </div> */}
                     <div className="text-center mt-6">
                         <p className="text-gray-600">
                             Chưa có tài khoản?{" "}

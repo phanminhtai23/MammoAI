@@ -8,11 +8,76 @@ import {
     MailOutlined,
 } from "@ant-design/icons";
 import { useNavigate, Link } from "react-router-dom";
-import userService from "../services/userService";
+import userService from "../../services/userService";
+import { useGoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "@greatsumini/react-facebook-login";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+    // Handle Google login
+    const registerGoogle = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const response = await userService.googleRegister({
+                    token: tokenResponse.access_token,
+                });
+                console.log("response:", response);
+                message.success("Đăng ký thành công!");
+                navigate("/login");
+            } catch (error) {
+                console.log("error:", error);
+                // Xử lý các loại lỗi và hiển thị popup
+                let msg = "Đăng ký thất bại";
+                // sai tài khoản hoặc mật khẩu
+                if (!error.response && error.message) {
+                    // lỗi kết nối
+                    message.error(error.message, 2);
+                } else if (error.response) {
+                    message.error(error.response.data.detail, 2); // sai tài khoản hoặc mật khẩu hay bị khóa tài khoản
+                } else if (error.request) {
+                    // lỗi kết nối
+                    message.error("Lỗi kết nối đến máy chủ", 2);
+                } else {
+                    // lỗi kết nối
+                    message.error("Đăng ký thất bại", 2);
+                }
+            }
+        },
+        onError: () => {
+            message.error("Google register thất bại", 2);
+        },
+    });
+
+    // Handle Facebook login
+    const handleFacebookRegister = async (res) => {
+        try {
+            // console.log("accessToken:", res);
+            const response = await userService.facebookRegister({
+                token: res.accessToken,
+            });
+            console.log("response:", response);
+            message.success("Đăng ký thành công!");
+            navigate("/login");
+        } catch (error) {
+            console.log("error:", error);
+            // Xử lý các loại lỗi và hiển thị popup
+            // sai tài khoản hoặc mật khẩu
+            if (!error.response && error.message) {
+                // lỗi kết nối
+                message.error(error.message, 2);
+            } else if (error.response) {
+                message.error(error.response.data.detail, 2); // sai tài khoản hoặc mật khẩu hay bị khóa tài khoản
+            } else if (error.request) {
+                // lỗi kết nối
+                message.error("Lỗi kết nối đến máy chủ", 2);
+            } else {
+                // lỗi kết nối
+                message.error("Đăng ký thất bại", 2);
+            }
+        }
+    };
 
     const onFinish = async (values) => {
         try {
@@ -26,20 +91,15 @@ const RegisterPage = () => {
 
             console.log("response:", values.email);
 
-            if (response.status_code === 201) {
-                
-                // Chỉ khi register thành công mới gửi verification code
-                console.log("Sending verification code to:", values.email);
-                await userService.sendVerificationCode({ email: values.email });
-                
-                message.success("Đăng ký thành công!");
-                // Navigate to verify page
-                navigate("/verify-code", {
-                    state: { email: values.email,
-                        message: "Xác nhận Email",
-                     },
-                });
-            }
+            // Chỉ khi register thành công mới gửi verification code
+            console.log("Sending verification code to:", values.email);
+            await userService.sendVerificationCode({ email: values.email });
+
+            message.success("Đăng ký thành công!");
+            // Navigate to verify page
+            navigate("/verify-code", {
+                state: { email: values.email, message: "Xác nhận Email" },
+            });
             // Chuyển hướng đến trang dashboard
             // navigate("/login");
         } catch (error) {
@@ -60,27 +120,13 @@ const RegisterPage = () => {
                 else if (typeof detail === "string") {
                     errorMessage = detail;
                 }
+            } else if (error.message) {
+                errorMessage = error.message;
             }
 
-            message.error(errorMessage);
+            message.error(errorMessage, 2);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleGoogleRegister = async () => {
-        try {
-            navigate("/login");
-        } catch (error) {
-            message.error("Đăng ký Google thất bại");
-        }
-    };
-
-    const handleFacebookRegister = async () => {
-        try {
-            navigate("/login");
-        } catch (error) {
-            message.error("Đăng ký Facebook thất bại");
         }
     };
 
@@ -225,24 +271,35 @@ const RegisterPage = () => {
 
                     <div className="space-y-4">
                         <Button
+                            block
+                            onClick={() => registerGoogle()}
+                            className="h-12 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 transition flex items-center justify-center bg-white"
                             icon={<GoogleOutlined />}
-                            block
-                            className="h-12 rounded-lg flex items-center justify-center border border-red-500 text-red-500 hover:bg-red-50 transition"
-                            onClick={handleGoogleRegister}
                         >
-                            Đăng Ký với Google
+                            Đăng ký bằng Google
                         </Button>
 
-                        <Button
-                            icon={<FacebookOutlined />}
-                            block
-                            className="h-12 rounded-lg flex items-center justify-center border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
-                            onClick={handleFacebookRegister}
-                        >
-                            Đăng Ký với Facebook
-                        </Button>
+                        <FacebookLogin
+                            appId={process.env.REACT_APP_FACEBOOK_APP_ID}
+                            autoLoad={false}
+                            fields="name,email,picture"
+                            // callback={handleFacebookRegister}
+                            onSuccess={(res) => {
+                                handleFacebookRegister(res);
+                            }}
+                            render={(renderProps) => (
+                                <Button
+                                    block
+                                    className="h-12 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition flex items-center justify-center bg-white"
+                                    onClick={renderProps.onClick}
+                                    disabled={renderProps.disabled}
+                                    icon={<FacebookOutlined />}
+                                >
+                                    Đăng ký bằng Facebook
+                                </Button>
+                            )}
+                        />
                     </div>
-
                     <div className="text-center mt-6">
                         <p className="text-gray-600">
                             Đã có tài khoản?{" "}

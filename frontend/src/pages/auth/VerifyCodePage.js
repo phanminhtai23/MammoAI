@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Form, Input, Button, message } from "antd";
 import { MailOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import userService from "../services/userService";
+import userService from "../../services/userService";
 
 const VerifyCodePage = () => {
     const navigate = useNavigate();
@@ -21,9 +21,7 @@ const VerifyCodePage = () => {
     ]);
 
     // Lấy email từ state hoặc localStorage
-    const email =
-        location.state?.email ||
-        "";
+    const email = location.state?.email || "";
     const msg = location.state?.message || "";
     // Đếm ngược cho nút gửi lại mã
     useEffect(() => {
@@ -100,15 +98,17 @@ const VerifyCodePage = () => {
         try {
             setLoading(true);
 
-            const response = await userService.verifyCode({email: email, code: code});
+            const response = await userService.verifyCode({
+                email: email,
+                code: code,
+            });
 
             if (response.status === 200) {
-                message.success(
-                    {
-                        content: "Xác nhận thành công! Vui lòng đăng nhập để vào hệ thống!",
-                        duration: 2,
-                    }
-                );
+                message.success({
+                    content:
+                        "Xác nhận thành công! Vui lòng đăng nhập để vào hệ thống!",
+                    duration: 2,
+                });
 
                 // Chuyển hướng đến trang đăng nhập
                 navigate("/login", {
@@ -136,15 +136,15 @@ const VerifyCodePage = () => {
         try {
             setResendLoading(true);
 
-            const response = await userService.sendVerificationCode({email: email});
+            const response = await userService.sendVerificationCode({
+                email: email,
+            });
 
             if (response.status === 200) {
-                message.success(
-                    {
-                        content: "Mã xác nhận mới đã được gửi đến email của bạn!",
-                        duration: 2,
-                    }
-                );
+                message.success({
+                    content: "Mã xác nhận mới đã được gửi đến email của bạn!",
+                    duration: 2,
+                });
 
                 // Reset countdown
                 setCountdown(60);
