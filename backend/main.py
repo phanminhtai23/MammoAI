@@ -1,7 +1,8 @@
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi import FastAPI
 from routes.route_user import router as users_router
-from routes.rout_email import router as email_router
+from routes.route_admin import router as admin_router
+from routes.route_email import router as email_router
 # from routes.drugs import router as drugs_router
 # from routes.ddi import router as ddi_router
 import uvicorn
@@ -53,16 +54,17 @@ app.add_middleware(
 
 app.include_router(users_router, prefix="/user", tags=["User"])
 app.include_router(email_router, prefix="/email", tags=["Email"])
+app.include_router(admin_router, prefix="/admin", tags=["Admin"])
 # app.include_router(drugs_router, prefix="/drugs", tags=["Drugs"])
 # app.include_router(ddi_router, prefix="/ddi", tags=["DDI"])
 
-@app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui():
-    return get_swagger_ui_html(
-        openapi_url="/openapi.json",
-        title="Custom Swagger UI",
-        swagger_ui_version="0.1.0",  # Thay đổi version tại đây
-    )
+# @app.get("/docs", include_in_schema=False)
+# async def custom_swagger_ui():
+#     return get_swagger_ui_html(
+#         openapi_url="/openapi.json",
+#         title="Custom Swagger UI",
+#         swagger_ui_version="0.1.0",  # Thay đổi version tại đây
+#     )
 
 
 if __name__ == "__main__":

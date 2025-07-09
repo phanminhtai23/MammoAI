@@ -12,6 +12,48 @@ from config import VERIFICATION_CODE_EXPIRE_MINUTES, FRONTEND_URL, GOOGLE_AUTH_U
 
 router = APIRouter()
 
+# Helper function để tạo user session
+async def create_user_session(user_id: str, auth_provider: str = "local"):
+    """
+    Tạo session mới cho user khi đăng nhập
+    """
+    session_id = str(uuid.uuid4())
+    session_data = {
+        "session_id": session_id,
+        "user_id": user_id,
+        "login_at": datetime.now(timezone.utc),
+        "logout_at": None,
+        "is_active": True,
+        "auth_provider": auth_provider
+    }
+    
+    try:
+        await users_session_collection.insert_one(session_data)
+        return session_id
+    except Exception as e:
+        print(f"Lỗi khi tạo session: {str(e)}")
+        return None
+
+# Helper function để cập nhật session khi logout
+async def end_user_session(session_id: str):
+    """
+    Kết thúc session khi user logout
+    """
+    try:
+        await users_session_collection.update_one(
+            {"session_id": session_id, "is_active": True},
+            {
+                "$set": {
+                    "logout_at": datetime.now(timezone.utc),
+                    "is_active": False
+                }
+            }
+        )
+        return True
+    except Exception as e:
+        print(f"Lỗi khi cập nhật session: {str(e)}")
+        return False
+
 @router.post("/register", response_model=dict)
 async def register(user: UserRegister):
     """
@@ -111,7 +153,7 @@ async def verify_code(data: VerifyCode):
     """
     Xác thực mã xác thực
     """
-    print("data:", data)
+    # print("data:", data)
     # Kiểm tra mã xác thực có tồn tại không
     verification_code = await verification_codes_collection.find_one({"email": data.email})
 
@@ -189,12 +231,16 @@ async def login(user: LoginRequest):
             detail="Tài khoản chưa xác thực"
         )
 
-    # Tạo access token
+    # Tạo user session
+    session_id = await create_user_session(db_user["id"], "local")
+    
+    # Tạo access token với session_id
     access_token, created_at, expires_at = create_access_token(
         data={
             "sub": db_user["email"],
             "user_id": db_user["id"],
-            "role": db_user["role"]
+            "role": db_user["role"],
+            "session_id": session_id
         }
     )
     
@@ -202,6 +248,7 @@ async def login(user: LoginRequest):
         "access_token": access_token,
         "token_type": "bearer",
         "message": "Đăng nhập thành công",
+        "session_id": session_id,
         "user": {
             "id": db_user["id"],
             "email": db_user["email"],
@@ -260,6 +307,38 @@ async def verify_token(user: dict = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
     return {"status": 200, "message": "Token hợp lệ"}
+
+@router.post("/logout")
+async def logout(user: dict = Depends(get_current_user)):
+    """
+    Đăng xuất tài khoản - cập nhật user session
+    """
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    # Lấy session_id từ token
+    session_id = user.get("session_id")
+    
+    if session_id:
+        # Cập nhật session khi logout
+        success = await end_user_session(session_id)
+        if success:
+            return {
+                "status": 200,
+                "message": "Đăng xuất thành công",
+                "session_id": session_id
+            }
+        else:
+            return {
+                "status": 200,
+                "message": "Đăng xuất thành công (session không tìm thấy)",
+                "session_id": session_id
+            }
+    else:
+        return {
+            "status": 200,
+            "message": "Đăng xuất thành công (không có session)",
+        }
 
 # Đặt lại mật khẩu
 @router.post("/reset-password")
@@ -330,18 +409,23 @@ async def google_login(req: GoogleLoginRequest):
             if not result:
                 raise HTTPException(status_code=400, detail="Lỗi khi tạo tài khoản")
 
+            # Tạo user session cho Google login
+            session_id = await create_user_session(user_data["id"], "google")
+
             access_token, created_at, expires_at = create_access_token(
                 data={
                     "sub": user_data["id"],
                     "user_id": user_data["id"],
                     "role": user_data["role"],
                     "auth_provider": user_data["auth_provider"],
+                    "session_id": session_id
                 }
             )
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
                 "message": "Đăng nhập thành công",
+                "session_id": session_id,
                 "user": {
                     "id": user_data["id"],
                     "name": user_data["name"],
@@ -356,6 +440,8 @@ async def google_login(req: GoogleLoginRequest):
                     detail="Tài khoản đã bị khóa"
                 )
 
+            # Tạo user session cho Google login existing user
+            session_id = await create_user_session(db_user["id"], "google")
             
             access_token, created_at, expires_at = create_access_token(
                 data={
@@ -363,6 +449,7 @@ async def google_login(req: GoogleLoginRequest):
                     "user_id": db_user["id"],
                     "role": db_user["role"],
                     "auth_provider": db_user["auth_provider"],
+                    "session_id": session_id
                 }
             )
             
@@ -370,6 +457,7 @@ async def google_login(req: GoogleLoginRequest):
                 "access_token": access_token,
                 "token_type": "bearer",
                 "message": "Đăng nhập thành công",
+                "session_id": session_id,
                 "user": {
                     "id": db_user["id"],
                     "name": db_user["name"],
@@ -389,7 +477,7 @@ async def facebook_login(req: FacebookLoginRequest):
         response = response.json()
         # print("response:", response)
         db_user = await users_collection.find_one({"provider_id": response["id"], "auth_provider": "facebook"})
-        # user đn bằng tài khoản google lần đầu -> tạo tk
+        # user đn bằng tài khoản facebook lần đầu -> tạo tk
         if not db_user:
             user_data = {
                 "id": response["id"],
@@ -409,18 +497,23 @@ async def facebook_login(req: FacebookLoginRequest):
             if not result:
                 raise HTTPException(status_code=400, detail="Lỗi khi tạo tài khoản")
 
+            # Tạo user session cho Facebook login
+            session_id = await create_user_session(user_data["id"], "facebook")
+
             access_token, created_at, expires_at = create_access_token(
                 data={
                     "sub": user_data["id"],
                     "user_id": user_data["id"],
                     "role": user_data["role"],
                     "auth_provider": user_data["auth_provider"],
+                    "session_id": session_id
                 }
             )
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
                 "message": "Đăng nhập thành công",
+                "session_id": session_id,
                 "user": {
                     "id": user_data["id"],
                     "name": user_data["name"],
@@ -435,6 +528,8 @@ async def facebook_login(req: FacebookLoginRequest):
                     detail="Tài khoản đã bị khóa"
                 )
 
+            # Tạo user session cho Facebook login existing user
+            session_id = await create_user_session(db_user["id"], "facebook")
             
             access_token, created_at, expires_at = create_access_token(
                 data={
@@ -442,6 +537,7 @@ async def facebook_login(req: FacebookLoginRequest):
                     "user_id": db_user["id"],
                     "role": db_user["role"],
                     "auth_provider": db_user["auth_provider"],
+                    "session_id": session_id
                 }
             )
             
@@ -449,6 +545,7 @@ async def facebook_login(req: FacebookLoginRequest):
                 "access_token": access_token,
                 "token_type": "bearer",
                 "message": "Đăng nhập thành công",
+                "session_id": session_id,
                 "user": {
                     "id": db_user["id"],
                     "name": db_user["name"],
@@ -557,95 +654,11 @@ async def facebook_register(req: FacebookLoginRequest):
 
 
 
-# Verify token xem còn hạn k
-@router.get("/verify-token")
-async def verify_token(user: dict = Depends(get_current_user)):
-    # Kiểm tra xem người dùng đã đăng nhập hay chưa
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    return {"status": 200, "message": "Token hợp lệ"}
-
-
-# @router.get("/")
-# async def get_all_users(user: dict = Depends(get_current_user)):
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Unauthorized")
-
-#     if not check_admin_role(user):
-#         raise HTTPException(status_code=403, detail="You do not have permission to access this resource")
-
-#     users = await users_collection.find({"role": "user"}).to_list()
-#     valid_users = []
-#     for user in users:
-#         try:
-#             valid_users.append({
-#                 "id": user["id"],
-#                 "email": user["email"],
-#                 "name": user["name"],  # ✅ Đúng
-#                 "role": user["role"]
-#             })
-#         except KeyError as e:
-#             print(f"Missing key: {e}, skipping invalid user: {user}")
-
-#     return {"message": "Got users successfully", "users": valid_users}
-
-
-
-# @router.post("/logout")
-# async def logout(token: str, user: dict = Depends(get_current_user)):
+# # Verify token xem còn hạn k
+# @router.get("/verify-token")
+# async def verify_token(user: dict = Depends(get_current_user)):
 #     # Kiểm tra xem người dùng đã đăng nhập hay chưa
 #     if not user:
 #         raise HTTPException(status_code=401, detail="Unauthorized")
-
-#     token_data = token.model_dump()
-#     token_data["token"] = str(token.token)
-#     # # Đánh dấu token hiện tại là "đã thu hồi" (revoked)
-#     # result = await tokens_collection.update_one(
-#     #     {"token": token_data["token"], "is_revoked": False},
-#     #     {"$set": {"is_revoked": True}}
-#     # )
-
-#     # # Kiểm tra xem token có tồn tại hay không
-#     # if result.matched_count == 0:
-#     #     print("Token không tồn tại hoặc đã được thu hồi")
-#     #     raise HTTPException(
-#     #         status_code=404, detail="Token không tồn tại hoặc đã được thu hồi")
-
-#     return {"status": 200, "message": "Đăng xuất thành công"}
-
-
-
-# @router.delete("/delete/{userEmail}")
-# async def delete_user(userEmail: str, user: dict = Depends(get_current_user)):
-#     # Kiểm tra xem người dùng đã đăng nhập hay chưa
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Unauthorized")
-
-#     # Xóa user từ database
-#     result = await users_collection.delete_one({"email": userEmail})
-#     # Kiểm tra xem user có tồn tại hay không
-#     if result.deleted_count == 0:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     # Xóa token liên quan đến user
-#     # await tokens_collection.delete_many({"username": userEmail})
-    
-#     return {"status": 200, "message": "User deleted successfully"}
-
-
-# @router.put("/update/{userEmail}")
-# async def update_user(userEmail: str, updated_data: dict, user: dict = Depends(get_current_user)):
-#     # Kiểm tra xem người dùng đã đăng nhập hay chưa
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Unauthorized")
-#     # Cập nhật thông tin user trong database
-    
-#     print("voday neee")
-#     result = await users_collection.update_one(
-#         {"email": userEmail},
-#         {"$set": {"full_name": updated_data.get("full_name"), "role": updated_data.get("role")}}
-#     )
-#     # Kiểm tra xem user có tồn tại hay không
-#     if result.matched_count == 0:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return {"status": 200, "message": "User updated successfully"}
+#     return {"status": 200, "message": "Token hợp lệ"}
 

@@ -2,23 +2,24 @@
 import axiosClient from "./axiosClient";
 
 const userService = {
-    // Lấy danh sách users
-    getAll: () => {
-        return axiosClient.get("/users");
-    },
+    // // Lấy danh sách users
+    // getAll: () => {
+    //     return axiosClient.get("/users");
+    // },
 
-    // Cập nhật thông tin user
-    update: (userEmail, updatedUser) => {
-        return axiosClient.put(`/user/update/${userEmail}`, updatedUser);
-    },
+    // // Cập nhật thông tin user
+    // update: (userEmail, updatedUser) => {
+    //     return axiosClient.put(`/user/update/${userEmail}`, updatedUser);
+    // },
 
-    // Xóa user
-    delete: (userEmail) => {
-        return axiosClient.delete(`/user/delete/${userEmail}`);
-    },
+    // // Xóa user
+    // delete: (userEmail) => {
+    //     return axiosClient.delete(`/user/delete/${userEmail}`);
+    // },
 
-    logout: (token) => {
-        return axiosClient.post("/user/logout", token);
+    // Logout
+    logout: () => {
+        return axiosClient.post("/user/logout");
     },
 
     // Login
@@ -75,7 +76,34 @@ const userService = {
     facebookRegister: (data) => {
         return axiosClient.post("/user/facebook-register", data);
     },
-    
+    // ===== ADMIN USER MANAGEMENT SERVICES =====
+    // Lấy danh sách users với filter và pagination (Admin only)
+    getUsersAdmin: (params = {}) => {
+        const queryString = new URLSearchParams(params).toString();
+        return axiosClient.get(
+            `/admin/users${queryString ? `?${queryString}` : ""}`
+        );
+    },
+
+    // Lấy chi tiết user (Admin only)
+    getUserDetailAdmin: (userId) => {
+        return axiosClient.get(`/admin/users/${userId}`);
+    },
+
+    // Cập nhật user (Admin only)
+    updateUserAdmin: (userId, userData) => {
+        return axiosClient.put(`/admin/users/${userId}`, userData);
+    },
+
+    // Xóa user (Admin only)
+    deleteUserAdmin: (userId) => {
+        return axiosClient.delete(`/admin/users/${userId}`);
+    },
+
+    // Lấy thống kê users (Admin only)
+    getUsersStatsAdmin: () => {
+        return axiosClient.get("/admin/users/stats/summary");
+    },
 };
 
 export default userService;

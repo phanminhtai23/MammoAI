@@ -19,7 +19,6 @@ import userService from "../services/userService";
 import { useNavigate } from "react-router-dom";
 import avt_admin from "../assets/avt_admin.png";
 
-
 const AdminDashboard = ({ avatarUrl, userName }) => {
     const [selectedKey, setSelectedKey] = useState("1");
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -49,12 +48,28 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
         let token = localStorage.getItem("token");
         if (token) {
             try {
+                // Gọi API logout để cập nhật user session
+                const response = await userService.logout();
+
+                // Xóa token khỏi localStorage
                 localStorage.removeItem("token");
+
                 message.success("Đăng xuất thành công!");
                 navigate("/login");
             } catch (error) {
-                console.log(error);
-                message.error("Đăng xuất không thành công!");
+                console.log("Logout error:", error);
+
+                // Vẫn xóa token ngay cả khi API lỗi
+                localStorage.removeItem("token");
+
+                if (error.response?.status === 401) {
+                    message.warning("Phiên đăng nhập đã hết hạn!");
+                } else {
+                    message.error(
+                        "Có lỗi khi đăng xuất, nhưng bạn đã được đăng xuất!"
+                    );
+                }
+                navigate("/login");
             }
         } else {
             message.error("Bạn chưa đăng nhập!");

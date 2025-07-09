@@ -9,7 +9,7 @@ import {
     Calendar,
     Settings,
 } from "lucide-react";
-import { Select, Card, Statistic, DatePicker } from "antd";
+import { Select, Card, Statistic, message, Spin } from "antd";
 import {
     LineChart,
     Line,
@@ -27,66 +27,111 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
-import dayjs from "dayjs";
-
-const { RangePicker } = DatePicker;
-
-// Mock data
-const mockStatistics = {
-    totalUsers: 1247,
-    onlineUsers: 89,
-    newUsersThisMonth: 156,
-    averageSessions: 4.2,
-};
-
-const mockNewUsersByMonth = [
-    { month: "01/2024", users: 45, label: "Tháng 1" },
-    { month: "02/2024", users: 67, label: "Tháng 2" },
-    { month: "03/2024", users: 89, label: "Tháng 3" },
-    { month: "04/2024", users: 123, label: "Tháng 4" },
-    { month: "05/2024", users: 98, label: "Tháng 5" },
-    { month: "06/2024", users: 156, label: "Tháng 6" },
-    { month: "07/2024", users: 134, label: "Tháng 7" },
-    { month: "08/2024", users: 178, label: "Tháng 8" },
-    { month: "09/2024", users: 145, label: "Tháng 9" },
-    { month: "10/2024", users: 167, label: "Tháng 10" },
-    { month: "11/2024", users: 189, label: "Tháng 11" },
-    { month: "12/2024", users: 201, label: "Tháng 12" },
-];
-
-const mockAuthProviderData = [
-    { name: "Local", value: 654, color: "#6B7280" },
-    { name: "Google", value: 423, color: "#3B82F6" },
-    { name: "Facebook", value: 170, color: "#60A5FA" },
-];
-
-const mockLoginsByDay = [
-    { date: "01/12", logins: 234, label: "1 Dec" },
-    { date: "02/12", logins: 187, label: "2 Dec" },
-    { date: "03/12", logins: 298, label: "3 Dec" },
-    { date: "04/12", logins: 276, label: "4 Dec" },
-    { date: "05/12", logins: 345, label: "5 Dec" },
-    { date: "06/12", logins: 189, label: "6 Dec" },
-    { date: "07/12", logins: 267, label: "7 Dec" },
-    { date: "08/12", logins: 312, label: "8 Dec" },
-    { date: "09/12", logins: 298, label: "9 Dec" },
-    { date: "10/12", logins: 356, label: "10 Dec" },
-    { date: "11/12", logins: 289, label: "11 Dec" },
-    { date: "12/12", logins: 423, label: "12 Dec" },
-    { date: "13/12", logins: 367, label: "13 Dec" },
-    { date: "14/12", logins: 398, label: "14 Dec" },
-];
+import trafficService from "../../services/trafficService";
 
 const UserTraffic = () => {
+    // State cho dữ liệu thực
+    const [statistics, setStatistics] = useState({
+        totalUsers: 0,
+        onlineUsers: 0,
+        newUsersThisMonth: 0,
+        averageSessions: 0,
+    });
+    const [newUsersByMonth, setNewUsersByMonth] = useState([]);
+    const [authProviderData, setAuthProviderData] = useState([]);
+    const [loginsByDay, setLoginsByDay] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    // State cho filters
     const [selectedMonths, setSelectedMonths] = useState(6);
-    const [loginPeriod, setLoginPeriod] = useState("day");
-    const [dateRange, setDateRange] = useState([
-        dayjs().subtract(13, "days"),
-        dayjs(),
-    ]);
+    const [loginDays, setLoginDays] = useState(14); // Thay đổi từ dateRange thành loginDays
+
+    // Fetch thống kê tổng quan
+    const fetchTrafficOverview = async () => {
+        try {
+            const response = await trafficService.getTrafficOverview();
+            if (response.data.status_code === 200) {
+                console.log("response.data.data: ", response.data.data);
+                setStatistics(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching traffic overview:", error);
+            message.error("Không thể tải thống kê tổng quan");
+        }
+    };
+
+    // Fetch user mới theo tháng
+    const fetchNewUsersByMonth = async (months = selectedMonths) => {
+        try {
+            const response = await trafficService.getNewUsersByMonth(months);
+            if (response.data.status_code === 200) {
+                setNewUsersByMonth(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching new users by month:", error);
+            message.error("Không thể tải thống kê user mới");
+        }
+    };
+
+    // Fetch phân bố auth provider
+    const fetchAuthProviderDistribution = async () => {
+        try {
+            const response = await trafficService.getAuthProviderDistribution();
+            if (response.data.status_code === 200) {
+                setAuthProviderData(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching auth provider distribution:", error);
+            message.error("Không thể tải phân bố auth provider");
+        }
+    };
+
+    // Fetch logins theo số ngày
+    const fetchLoginsByDays = async (days = loginDays) => {
+        try {
+            const response = await trafficService.getLoginsByPeriod(
+                "day", // luôn theo ngày
+                days
+            );
+            if (response.data.status_code === 200) {
+                setLoginsByDay(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching logins by period:", error);
+            message.error("Không thể tải thống kê đăng nhập");
+        }
+    };
+
+    // Load tất cả dữ liệu khi component mount
+    const loadAllData = async () => {
+        setLoading(true);
+        try {
+            await Promise.all([
+                fetchTrafficOverview(),
+                fetchNewUsersByMonth(),
+                fetchAuthProviderDistribution(),
+                fetchLoginsByDays(),
+            ]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Effects
+    useEffect(() => {
+        loadAllData();
+    }, []);
+
+    useEffect(() => {
+        fetchNewUsersByMonth(selectedMonths);
+    }, [selectedMonths]);
+
+    useEffect(() => {
+        fetchLoginsByDays(loginDays);
+    }, [loginDays]);
 
     const getFilteredNewUsers = () => {
-        return mockNewUsersByMonth.slice(-selectedMonths);
+        return newUsersByMonth;
     };
 
     const formatNumber = (num) => {
@@ -121,7 +166,7 @@ const UserTraffic = () => {
                                         Tổng số người dùng
                                     </span>
                                 }
-                                value={mockStatistics.totalUsers}
+                                value={statistics.totalUsers}
                                 formatter={(value) => formatNumber(value)}
                                 prefix={
                                     <Users
@@ -144,7 +189,7 @@ const UserTraffic = () => {
                                         Đang online
                                     </span>
                                 }
-                                value={mockStatistics.onlineUsers}
+                                value={statistics.onlineUsers}
                                 formatter={(value) => formatNumber(value)}
                                 prefix={
                                     <UserCheck
@@ -167,7 +212,7 @@ const UserTraffic = () => {
                                         Người dùng mới tháng này
                                     </span>
                                 }
-                                value={mockStatistics.newUsersThisMonth}
+                                value={statistics.newUsersThisMonth}
                                 formatter={(value) => formatNumber(value)}
                                 prefix={
                                     <TrendingUp
@@ -190,7 +235,7 @@ const UserTraffic = () => {
                                         Phiên trung bình
                                     </span>
                                 }
-                                value={mockStatistics.averageSessions}
+                                value={statistics.averageSessions}
                                 precision={1}
                                 prefix={
                                     <BarChart3
@@ -208,219 +253,165 @@ const UserTraffic = () => {
                     </div>
 
                     {/* Charts Grid - Layout mới theo yêu cầu */}
-                    <div
-                        className="grid grid-cols-1 lg:grid-cols-3 gap-2"
-                        style={{ height: "calc(100vh - 140px)" }}
-                    >
-                        {/* Cột trái - Chứa 2 biểu đồ xếp dọc */}
-                        <div className="lg:col-span-2 space-y-3 h-full flex flex-col">
-                            {/* New Users by Month - Area Chart */}
-                            <Card
-                                title={
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-800 font-medium text-xs">
-                                            Người dùng mới theo tháng
-                                        </span>
-                                        <Select
-                                            value={selectedMonths}
-                                            onChange={setSelectedMonths}
-                                            className="w-24"
-                                            size="small"
-                                            options={[
-                                                { value: 3, label: "3 Tháng" },
-                                                { value: 6, label: "6 Tháng" },
-                                                { value: 12, label: "12 Tháng" },
-                                            ]}
-                                        />
-                                    </div>
-                                }
-                                className="border-gray-200 shadow-sm flex-1"
-                            >
-                                <ResponsiveContainer width="100%" height={160}>
-                                    <AreaChart data={getFilteredNewUsers()}>
-                                        <defs>
-                                            <linearGradient
-                                                id="colorUsers"
-                                                x1="0"
-                                                y1="0"
-                                                x2="0"
-                                                y2="1"
-                                            >
-                                                <stop
-                                                    offset="5%"
-                                                    stopColor="#3B82F6"
-                                                    stopOpacity={0.3}
-                                                />
-                                                <stop
-                                                    offset="95%"
-                                                    stopColor="#3B82F6"
-                                                    stopOpacity={0}
-                                                />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid
-                                            strokeDasharray="3 3"
-                                            stroke="#E5E7EB"
-                                        />
-                                        <XAxis
-                                            dataKey="label"
-                                            stroke="#6B7280"
-                                            fontSize={10}
-                                            height={30}
-                                        />
-                                        <YAxis
-                                            stroke="#6B7280"
-                                            fontSize={10}
-                                            width={35}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: "white",
-                                                border: "1px solid #E5E7EB",
-                                                borderRadius: "8px",
-                                                boxShadow:
-                                                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                                            }}
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="users"
-                                            stroke="#3B82F6"
-                                            strokeWidth={2}
-                                            fillOpacity={1}
-                                            fill="url(#colorUsers)"
-                                            dot={{
-                                                fill: "#3B82F6",
-                                                strokeWidth: 2,
-                                                r: 4,
-                                            }}
-                                        />
-                                    </AreaChart>
-                                </ResponsiveContainer>
-                            </Card>
-
-                            {/* Login Sessions by Day - Bar Chart */}
-                            <Card
-                                title={
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-gray-800 font-medium text-xs">
-                                            Lượt đăng nhập theo ngày
-                                        </span>
-                                        <div className="flex items-center gap-1">
+                    <Spin spinning={loading}>
+                        <div
+                            className="grid grid-cols-1 lg:grid-cols-3 gap-2"
+                            style={{ height: "calc(100vh - 140px)" }}
+                        >
+                            {/* Cột trái - Chứa 2 biểu đồ xếp dọc */}
+                            <div className="lg:col-span-2 space-y-3 h-full flex flex-col">
+                                {/* New Users by Month - Area Chart */}
+                                <Card
+                                    title={
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-800 font-medium text-xs">
+                                                Người dùng mới theo tháng
+                                            </span>
                                             <Select
-                                                value={loginPeriod}
-                                                onChange={setLoginPeriod}
-                                                className="w-16"
+                                                value={selectedMonths}
+                                                onChange={setSelectedMonths}
+                                                className="w-24"
                                                 size="small"
                                                 options={[
                                                     {
-                                                        value: "day",
-                                                        label: "D",
+                                                        value: 3,
+                                                        label: "3 Tháng",
                                                     },
                                                     {
-                                                        value: "week",
-                                                        label: "W",
+                                                        value: 6,
+                                                        label: "6 Tháng",
                                                     },
                                                     {
-                                                        value: "month",
-                                                        label: "M",
+                                                        value: 12,
+                                                        label: "12 Tháng",
                                                     },
                                                 ]}
                                             />
-                                            <RangePicker
-                                                value={dateRange}
-                                                onChange={setDateRange}
-                                                format="DD/MM"
-                                                size="small"
-                                            />
                                         </div>
-                                    </div>
-                                }
-                                className="border-gray-200 shadow-sm flex-1 min-h-0"
-                            >
-                                <ResponsiveContainer width="100%" height={140}>
-                                    <BarChart data={mockLoginsByDay}>
-                                        <CartesianGrid
-                                            strokeDasharray="3 3"
-                                            stroke="#E5E7EB"
-                                        />
-                                        <XAxis
-                                            dataKey="date"
-                                            stroke="#6B7280"
-                                            fontSize={10}
-                                            height={30}
-                                        />
-                                        <YAxis
-                                            stroke="#6B7280"
-                                            fontSize={10}
-                                            width={35}
-                                        />
-                                        <Tooltip
-                                            formatter={(value) => [
-                                                formatNumber(value),
-                                                "Lượt đăng nhập",
-                                            ]}
-                                            contentStyle={{
-                                                backgroundColor: "white",
-                                                border: "1px solid #E5E7EB",
-                                                borderRadius: "8px",
-                                                boxShadow:
-                                                    "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                                            }}
-                                        />
-                                        <Bar
-                                            dataKey="logins"
-                                            fill="#2563EB"
-                                            radius={[4, 4, 0, 0]}
-                                        />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </Card>
-                        </div>
-
-                        {/* Cột phải - Auth Provider Distribution - Pie Chart với chú thích */}
-                        <div className="lg:col-span-1">
-                            <Card
-                                title={
-                                    <span className="text-gray-800 font-medium text-xs">
-                                        Phân bố theo nhà cung cấp
-                                    </span>
-                                }
-                                className="border-gray-200 shadow-sm h-full"
-                            >
-                                <div className="flex flex-col h-full">
+                                    }
+                                    className="border-gray-200 shadow-sm flex-1"
+                                >
                                     <ResponsiveContainer
                                         width="100%"
-                                        height={320}
+                                        height={160}
                                     >
-                                        <RechartsPieChart>
-                                            <Pie
-                                                data={mockAuthProviderData}
-                                                cx="50%"
-                                                cy="45%"
-                                                labelLine={false}
-                                                label={({ percent }) =>
-                                                    `${(percent * 100).toFixed(
-                                                        0
-                                                    )}%`
-                                                }
-                                                outerRadius={100}
-                                                fill="#8884d8"
-                                                dataKey="value"
-                                            >
-                                                {mockAuthProviderData.map(
-                                                    (entry, index) => (
-                                                        <Cell
-                                                            key={`cell-${index}`}
-                                                            fill={entry.color}
-                                                        />
-                                                    )
-                                                )}
-                                            </Pie>
+                                        <AreaChart data={getFilteredNewUsers()}>
+                                            <defs>
+                                                <linearGradient
+                                                    id="colorUsers"
+                                                    x1="0"
+                                                    y1="0"
+                                                    x2="0"
+                                                    y2="1"
+                                                >
+                                                    <stop
+                                                        offset="5%"
+                                                        stopColor="#3B82F6"
+                                                        stopOpacity={0.3}
+                                                    />
+                                                    <stop
+                                                        offset="95%"
+                                                        stopColor="#3B82F6"
+                                                        stopOpacity={0}
+                                                    />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                stroke="#E5E7EB"
+                                            />
+                                            <XAxis
+                                                dataKey="label"
+                                                stroke="#6B7280"
+                                                fontSize={10}
+                                                height={30}
+                                            />
+                                            <YAxis
+                                                stroke="#6B7280"
+                                                fontSize={10}
+                                                width={35}
+                                            />
+                                            <Tooltip
+                                                contentStyle={{
+                                                    backgroundColor: "white",
+                                                    border: "1px solid #E5E7EB",
+                                                    borderRadius: "8px",
+                                                    boxShadow:
+                                                        "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                                }}
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="users"
+                                                stroke="#3B82F6"
+                                                strokeWidth={2}
+                                                fillOpacity={1}
+                                                fill="url(#colorUsers)"
+                                                dot={{
+                                                    fill: "#3B82F6",
+                                                    strokeWidth: 2,
+                                                    r: 4,
+                                                }}
+                                            />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </Card>
+
+                                {/* Login Sessions by Day - Bar Chart */}
+                                <Card
+                                    title={
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-gray-800 font-medium text-xs">
+                                                Lượt đăng nhập gần đây
+                                            </span>
+                                            <Select
+                                                value={loginDays}
+                                                onChange={setLoginDays}
+                                                size="small"
+                                                className="w-26"
+                                                options={[
+                                                    {
+                                                        value: 7,
+                                                        label: "7 ngày",
+                                                    },
+                                                    {
+                                                        value: 10,
+                                                        label: "10 ngày",
+                                                    },
+                                                    {
+                                                        value: 14,
+                                                        label: "14 ngày",
+                                                    },
+                                                ]}
+                                            />
+                                        </div>
+                                    }
+                                    className="border-gray-200 shadow-sm flex-1 min-h-0"
+                                >
+                                    <ResponsiveContainer
+                                        width="100%"
+                                        height={140}
+                                    >
+                                        <BarChart data={loginsByDay}>
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                stroke="#E5E7EB"
+                                            />
+                                            <XAxis
+                                                dataKey="date"
+                                                stroke="#6B7280"
+                                                fontSize={10}
+                                                height={30}
+                                            />
+                                            <YAxis
+                                                stroke="#6B7280"
+                                                fontSize={10}
+                                                width={35}
+                                            />
                                             <Tooltip
                                                 formatter={(value) => [
                                                     formatNumber(value),
-                                                    "Người dùng",
+                                                    "Lượt đăng nhập",
                                                 ]}
                                                 contentStyle={{
                                                     backgroundColor: "white",
@@ -430,45 +421,112 @@ const UserTraffic = () => {
                                                         "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                                                 }}
                                             />
-                                        </RechartsPieChart>
+                                            <Bar
+                                                dataKey="logins"
+                                                fill="#2563EB"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                        </BarChart>
                                     </ResponsiveContainer>
+                                </Card>
+                            </div>
 
-                                    {/* Chú thích màu sắc nằm dưới */}
-                                    <div className="mt-2 space-y-1">
-                                        {mockAuthProviderData.map(
-                                            (item, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex items-center gap-1"
+                            {/* Cột phải - Auth Provider Distribution - Pie Chart với chú thích */}
+                            <div className="lg:col-span-1">
+                                <Card
+                                    title={
+                                        <span className="text-gray-800 font-medium text-xs">
+                                            Phân bố theo nhà cung cấp
+                                        </span>
+                                    }
+                                    className="border-gray-200 shadow-sm h-full"
+                                >
+                                    <div className="flex flex-col h-full">
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height={320}
+                                        >
+                                            <RechartsPieChart>
+                                                <Pie
+                                                    data={authProviderData}
+                                                    cx="50%"
+                                                    cy="45%"
+                                                    labelLine={false}
+                                                    label={({ percent }) =>
+                                                        `${(
+                                                            percent * 100
+                                                        ).toFixed(0)}%`
+                                                    }
+                                                    outerRadius={100}
+                                                    fill="#8884d8"
+                                                    dataKey="value"
                                                 >
+                                                    {authProviderData.map(
+                                                        (entry, index) => (
+                                                            <Cell
+                                                                key={`cell-${index}`}
+                                                                fill={
+                                                                    entry.color
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                                </Pie>
+                                                <Tooltip
+                                                    formatter={(value) => [
+                                                        formatNumber(value),
+                                                        "Người dùng",
+                                                    ]}
+                                                    contentStyle={{
+                                                        backgroundColor:
+                                                            "white",
+                                                        border: "1px solid #E5E7EB",
+                                                        borderRadius: "8px",
+                                                        boxShadow:
+                                                            "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                                                    }}
+                                                />
+                                            </RechartsPieChart>
+                                        </ResponsiveContainer>
+
+                                        {/* Chú thích màu sắc nằm dưới */}
+                                        <div className="mt-2 space-y-1">
+                                            {authProviderData.map(
+                                                (item, index) => (
                                                     <div
-                                                        className="w-2 h-2 rounded-full"
-                                                        style={{
-                                                            backgroundColor:
-                                                                item.color,
-                                                        }}
-                                                    ></div>
-                                                    <span className="text-xs text-gray-600">
-                                                        {item.name === "Google"
-                                                            ? "Gmail"
-                                                            : item.name ===
-                                                              "Facebook"
-                                                            ? "Facebook"
-                                                            : item.name}
-                                                    </span>
-                                                    <span className="text-xs font-medium text-gray-800 ml-auto">
-                                                        {formatNumber(
-                                                            item.value
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            )
-                                        )}
+                                                        key={index}
+                                                        className="flex items-center gap-1"
+                                                    >
+                                                        <div
+                                                            className="w-2 h-2 rounded-full"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    item.color,
+                                                            }}
+                                                        ></div>
+                                                        <span className="text-xs text-gray-600">
+                                                            {item.name ===
+                                                            "Google"
+                                                                ? "Gmail"
+                                                                : item.name ===
+                                                                  "Facebook"
+                                                                ? "Facebook"
+                                                                : item.name}
+                                                        </span>
+                                                        <span className="text-xs font-medium text-gray-800 ml-auto">
+                                                            {formatNumber(
+                                                                item.value
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </Card>
+                                </Card>
+                            </div>
                         </div>
-                    </div>
+                    </Spin>
                 </div>
             </div>
         </>
