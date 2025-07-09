@@ -1,200 +1,657 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import backgroundImage from "../assets/background_home.jpg";
 
 const HomePage = () => {
-    return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Header */}
-            <header className="bg-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-                    <div className="flex items-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-10 w-10 text-blue-600 mr-3"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
-                            />
-                        </svg>
-                        <span className="text-2xl font-bold text-gray-800">
-                            Medical Management
-                        </span>
-                    </div>
-                    <nav>
-                        <Link
-                            to="/login"
-                            className="bg-blue-600 text-white px-4 py-2 rounded-md mr-2 hover:bg-blue-700"
-                        >
-                            Đăng Nhập
-                        </Link>
-                        <Link
-                            to="/register"
-                            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-                        >
-                            Đăng Ký
-                        </Link>
-                    </nav>
-                </div>
-            </header>
+    const observerRef = useRef();
 
-            {/* Hero Section */}
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="lg:flex items-center">
-                    <div className="lg:w-1/2 mb-8 lg:mb-0">
-                        <h1 className="text-4xl font-extrabold text-gray-900 mb-6">
-                            Hệ Thống Quản Lý Y Tế Thông Minh
-                        </h1>
-                        <p className="text-xl text-gray-600 mb-8">
-                            Giải pháp toàn diện cho việc quản lý thông tin y tế,
-                            thuốc men và tương tác dược chất một cách chuyên
-                            nghiệp và hiệu quả.
-                        </p>
-                        <div className="flex space-x-4">
-                            <button
-                                onClick={() =>
-                                    (window.location.href = "/register")
-                                }
-                                className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition duration-300"
-                            >
-                                Đăng Ký Ngay
-                            </button>
-                            <button className="bg-gray-200 text-gray-800 px-6 py-3 rounded-md hover:bg-gray-300 transition duration-300">
-                                Tìm Hiểu Thêm
-                            </button>
+    useEffect(() => {
+        observerRef.current = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("animate-fade-in");
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        const animatedElements = document.querySelectorAll(".scroll-animate");
+        animatedElements.forEach((el) => {
+            observerRef.current.observe(el);
+        });
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, []);
+
+    return (
+        <div
+            className="min-h-screen bg-cover bg-center bg-fixed relative"
+            style={{
+                backgroundImage: `url(${backgroundImage})`,
+            }}
+        >
+            {/* Overlay để làm mờ background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-blue-800/20 to-blue-900/40"></div>
+
+            {/* CSS cho animations */}
+            <style jsx>{`
+                .scroll-animate {
+                    opacity: 0;
+                    transform: translateY(50px);
+                    transition: all 0.8s ease-out;
+                }
+                .animate-fade-in {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                .floating {
+                    animation: float 6s ease-in-out infinite;
+                }
+                @keyframes float {
+                    0%,
+                    100% {
+                        transform: translateY(0px);
+                    }
+                    50% {
+                        transform: translateY(-20px);
+                    }
+                }
+            `}</style>
+
+            {/* Nội dung chính */}
+            <div className="relative z-10">
+                {/* Header với menu ngang */}
+                <header className="bg-white/95 shadow-xl border-b-2 border-blue-200 backdrop-blur-md sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center py-4">
+                            {/* Logo */}
+                            <div className="flex items-center">
+                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-full p-3 mr-3 shadow-lg">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-8 w-8 text-white"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <span className="text-2xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent">
+                                    MammoAI
+                                </span>
+                            </div>
+
+                            {/* Menu ngang */}
+                            <nav className="hidden md:flex space-x-8">
+                                <Link
+                                    to="/"
+                                    className="text-blue-800 font-semibold px-4 py-2 rounded-full hover:bg-blue-100 transition duration-300"
+                                >
+                                    Trang chủ
+                                </Link>
+                                <Link
+                                    to="/screening"
+                                    className="text-gray-700 font-semibold px-4 py-2 rounded-full hover:bg-blue-100 hover:text-blue-800 transition duration-300"
+                                >
+                                    Tầm soát ung thư
+                                </Link>
+                                <div className="relative group">
+                                    <Link
+                                        to="/login"
+                                        className="text-gray-700 font-semibold px-4 py-2 rounded-full hover:bg-blue-100 hover:text-blue-800 transition duration-300"
+                                    >
+                                        Đăng nhập
+                                    </Link>
+                                    <div className="absolute top-full left-0 mt-2 bg-blue-100 text-blue-800 text-xs px-3 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Chỉ dành cho Bác Sĩ
+                                    </div>
+                                </div>
+                                <div className="relative group">
+                                    <Link
+                                        to="/register"
+                                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-full hover:from-blue-600 hover:to-blue-700 transition duration-300 shadow-lg"
+                                    >
+                                        Đăng ký
+                                    </Link>
+                                    <div className="absolute top-full left-0 mt-2 bg-blue-100 text-blue-800 text-xs px-3 py-2 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Chỉ dành cho Bác Sĩ
+                                    </div>
+                                </div>
+                            </nav>
+
+                            {/* Mobile menu button */}
+                            <div className="md:hidden">
+                                <button className="text-blue-800 hover:text-blue-600 p-2">
+                                    <svg
+                                        className="h-6 w-6"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M4 6h16M4 12h16M4 18h16"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </header>
 
-                    <div className="lg:w-1/2 flex justify-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 600 400"
-                            className="w-full max-w-md"
-                        >
-                            <rect width="600" height="400" fill="#f0f9ff" />
-                            <circle cx="300" cy="200" r="120" fill="#e6f2ff" />
-
-                            {/* Medical icons */}
-                            <path
-                                d="M300 130 L320 170 L360 175 L330 205 L340 245 L300 225 L260 245 L270 205 L240 175 L280 170 Z"
-                                fill="#3b82f6"
-                            />
-
-                            {/* Additional medical elements */}
-                            <rect
-                                x="250"
-                                y="50"
-                                width="100"
-                                height="20"
-                                fill="#60a5fa"
-                            />
-                            <circle cx="200" cy="100" r="30" fill="#93c5fd" />
-                            <circle cx="400" cy="300" r="30" fill="#93c5fd" />
-                        </svg>
-                    </div>
-                </div>
-
-                {/* Features Section */}
-                <section className="mt-16">
-                    <h2 className="text-3xl font-bold text-center mb-12">
-                        Tính Năng Chính
-                    </h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            {
-                                title: "Quản Lý Người Dùng",
-                                description:
-                                    "Theo dõi và quản lý thông tin người dùng một cách dễ dàng và chính xác.",
-                                icon: (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-12 w-12 text-blue-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                                        />
-                                    </svg>
-                                ),
-                            },
-                            {
-                                title: "Quản Lý Thuốc",
-                                description:
-                                    "Tra cứu, cập nhật và quản lý kho thuốc một cách chuyên nghiệp.",
-                                icon: (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-12 w-12 text-green-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 01-4.658-4.658l-.477-2.387a2 2 0 00-.547-1.022L6 5m8 8l-1.535-1.535a5 5 0 01-1.464-3.535V5a2 2 0 00-2-2H5.64c-.602 0-1.136.422-1.22 1.007A9 9 0 1021.75 7.838c-.085-.084-.19-.149-.307-.196L19 7m-8-3a5 5 0 00-5 5v.001"
-                                        />
-                                    </svg>
-                                ),
-                            },
-                            {
-                                title: "Tương Tác Thuốc",
-                                description:
-                                    "Phân tích và cảnh báo các tương tác giữa các loại thuốc.",
-                                icon: (
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="h-12 w-12 text-red-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                ),
-                            },
-                        ].map((feature, index) => (
-                            <div
-                                key={index}
-                                className="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-xl transition duration-300"
-                            >
-                                <div className="flex justify-center mb-4">
-                                    {feature.icon}
-                                </div>
-                                <h3 className="text-xl font-semibold mb-3">
-                                    {feature.title}
-                                </h3>
-                                <p className="text-gray-600">
-                                    {feature.description}
+                {/* Hero Section - Text ở góc trái */}
+                <section className="min-h-screen flex items-center">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                        <div className="flex flex-col lg:flex-row items-center justify-between">
+                            {/* Text content - bên trái */}
+                            <div className="lg:w-1/2 text-left mb-12 lg:mb-0">
+                                <h1 className="text-6xl lg:text-7xl font-extrabold text-white mb-8 leading-tight">
+                                    Tầm Soát
+                                    <br />
+                                    <span className="text-blue-300">
+                                        Ung Thư Vú
+                                    </span>
+                                </h1>
+                                <p className="text-xl lg:text-2xl text-blue-100 mb-12 leading-relaxed max-w-2xl">
+                                    Trả lời bảng câu hỏi để hỗ trợ tầm soát và
+                                    đánh giá nguy cơ ung thư vú một cách nhanh
+                                    chóng và chính xác
                                 </p>
+
+                                <div className="flex flex-col sm:flex-row gap-6">
+                                    <button
+                                        onClick={() =>
+                                            (window.location.href =
+                                                "/screening")
+                                        }
+                                        className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-5 rounded-2xl text-xl font-semibold hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition duration-300 shadow-2xl"
+                                    >
+                                        🔍 Bắt Đầu Tầm Soát
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            (window.location.href =
+                                                "/appointment")
+                                        }
+                                        className="bg-white/20 backdrop-blur-sm text-white border-2 border-white px-10 py-5 rounded-2xl text-xl font-semibold hover:bg-white/30 transform hover:scale-105 transition duration-300 shadow-2xl"
+                                    >
+                                        📅 Đặt Lịch Khám
+                                    </button>
+                                </div>
                             </div>
-                        ))}
+
+                            {/* Floating elements - bên phải */}
+                            <div className="lg:w-1/2 flex justify-center relative">
+                                <div className="floating">
+                                    <div className="relative">
+                                        <div className="w-80 h-80 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl">
+                                            <div className="w-60 h-60 bg-blue-500/20 rounded-full flex items-center justify-center">
+                                                <svg
+                                                    className="w-32 h-32 text-white"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        {/* Floating particles */}
+                                        <div
+                                            className="absolute top-10 -right-4 w-6 h-6 bg-blue-300 rounded-full opacity-70 floating"
+                                            style={{ animationDelay: "1s" }}
+                                        ></div>
+                                        <div
+                                            className="absolute bottom-16 -left-8 w-4 h-4 bg-white rounded-full opacity-60 floating"
+                                            style={{ animationDelay: "2s" }}
+                                        ></div>
+                                        <div
+                                            className="absolute top-32 left-12 w-3 h-3 bg-blue-200 rounded-full opacity-80 floating"
+                                            style={{ animationDelay: "0.5s" }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
-            </main>
 
-            {/* Footer */}
-            <footer className="bg-gray-800 text-white py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p>&copy; 2025 Medical Management.</p>
-                </div>
-            </footer>
+                {/* Nguy cơ ung thư section - giữ nguyên */}
+                <section className="py-20 scroll-animate">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-12">
+                            <h2 className="text-4xl font-bold text-center text-blue-900 mb-12">
+                                Mức Độ Nguy Cơ Ung Thư Vú
+                            </h2>
+                            <div className="grid md:grid-cols-3 gap-10">
+                                <div className="text-center p-8 bg-green-50 rounded-2xl border-2 border-green-200 shadow-lg hover:shadow-xl transition duration-500 scroll-animate">
+                                    <div className="bg-gradient-to-r from-green-400 to-green-500 w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+                                        <span className="text-white text-3xl font-bold">
+                                            L
+                                        </span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-green-800 mb-4">
+                                        Nguy Cơ Thấp
+                                    </h3>
+                                    <p className="text-green-700 text-lg">
+                                        Kết quả tầm soát cho thấy nguy cơ thấp.
+                                        Tiếp tục theo dõi định kỳ.
+                                    </p>
+                                </div>
+
+                                <div
+                                    className="text-center p-8 bg-yellow-50 rounded-2xl border-2 border-yellow-200 shadow-lg hover:shadow-xl transition duration-500 scroll-animate"
+                                    style={{ animationDelay: "0.2s" }}
+                                >
+                                    <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+                                        <span className="text-white text-3xl font-bold">
+                                            M
+                                        </span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-yellow-800 mb-4">
+                                        Nguy Cơ Trung Bình
+                                    </h3>
+                                    <p className="text-yellow-700 text-lg">
+                                        Cần theo dõi chặt chẽ và tham khảo ý
+                                        kiến bác sĩ chuyên khoa.
+                                    </p>
+                                </div>
+
+                                <div
+                                    className="text-center p-8 bg-red-50 rounded-2xl border-2 border-red-200 shadow-lg hover:shadow-xl transition duration-500 scroll-animate"
+                                    style={{ animationDelay: "0.4s" }}
+                                >
+                                    <div className="bg-gradient-to-r from-red-400 to-red-500 w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
+                                        <span className="text-white text-3xl font-bold">
+                                            H
+                                        </span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-red-800 mb-4">
+                                        Nguy Cơ Cao
+                                    </h3>
+                                    <p className="text-red-700 text-lg">
+                                        Nên đi khám ngay để được chẩn đoán và
+                                        điều trị kịp thời.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* About Section - Mới */}
+                <section className="py-20 scroll-animate">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="grid lg:grid-cols-2 gap-16 items-center">
+                            <div>
+                                <h2 className="text-5xl font-bold text-white mb-8">
+                                    Tại sao nên tầm soát sớm?
+                                </h2>
+                                <div className="space-y-6">
+                                    <div className="flex items-start">
+                                        <div className="bg-blue-500 rounded-full p-3 mr-4 mt-1">
+                                            <svg
+                                                className="w-6 h-6 text-white"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-semibold text-white mb-2">
+                                                Phát hiện sớm
+                                            </h3>
+                                            <p className="text-blue-100">
+                                                Tỷ lệ khỏi bệnh lên đến 95% khi
+                                                phát hiện ở giai đoạn sớm
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="bg-blue-500 rounded-full p-3 mr-4 mt-1">
+                                            <svg
+                                                className="w-6 h-6 text-white"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-semibold text-white mb-2">
+                                                Điều trị hiệu quả
+                                            </h3>
+                                            <p className="text-blue-100">
+                                                Phương pháp điều trị ít xâm lấn
+                                                hơn khi phát hiện sớm
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start">
+                                        <div className="bg-blue-500 rounded-full p-3 mr-4 mt-1">
+                                            <svg
+                                                className="w-6 h-6 text-white"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-semibold text-white mb-2">
+                                                Chi phí thấp
+                                            </h3>
+                                            <p className="text-blue-100">
+                                                Tiết kiệm chi phí điều trị đáng
+                                                kể khi phát hiện sớm
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div className="bg-white/15 backdrop-blur-sm rounded-3xl p-10 shadow-2xl border border-white/20">
+                                    <div className="text-center">
+                                        <div className="text-6xl mb-6">📊</div>
+                                        <h3 className="text-2xl font-bold text-white mb-8">
+                                            Thống Kê Quan Trọng
+                                        </h3>
+                                        <div className="grid grid-cols-1 gap-6">
+                                            <div className="bg-gradient-to-r from-blue-500/30 to-blue-600/30 backdrop-blur-sm rounded-2xl p-6 border border-blue-300/30">
+                                                <div className="text-4xl font-bold text-blue-200 mb-2">
+                                                    1/8
+                                                </div>
+                                                <div className="text-white text-lg font-medium">
+                                                    Phụ nữ có nguy cơ mắc ung
+                                                    thư vú
+                                                </div>
+                                            </div>
+                                            <div className="bg-gradient-to-r from-green-500/30 to-green-600/30 backdrop-blur-sm rounded-2xl p-6 border border-green-300/30">
+                                                <div className="text-4xl font-bold text-green-200 mb-2">
+                                                    95%
+                                                </div>
+                                                <div className="text-white text-lg font-medium">
+                                                    Tỷ lệ khỏi bệnh khi phát
+                                                    hiện sớm
+                                                </div>
+                                            </div>
+                                            <div className="bg-gradient-to-r from-purple-500/30 to-purple-600/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-300/30">
+                                                <div className="text-4xl font-bold text-purple-200 mb-2">
+                                                    #2
+                                                </div>
+                                                <div className="text-white text-lg font-medium">
+                                                    Loại ung thư phổ biến nhất ở
+                                                    phụ nữ
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Thống kê tử vong WHO - Thay thế phần Quy trình tầm soát */}
+                <section className="py-20 scroll-animate">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="bg-gradient-to-r from-red-900/80 to-red-800/80 backdrop-blur-sm rounded-3xl p-12 shadow-2xl border border-red-500/30">
+                            <div className="text-center mb-12">
+                                <h2 className="text-5xl font-bold text-white mb-6">
+                                    Thống Kê Tử Vong Từ WHO
+                                </h2>
+                                <p className="text-xl text-red-100 max-w-4xl mx-auto leading-relaxed">
+                                    Theo thống kê mới nhất từ{" "}
+                                    <strong>
+                                        Tổ chức Y tế Thế giới (WHO) năm 2022
+                                    </strong>
+                                    , ung thư vú vẫn là mối đe dọa nghiêm trọng
+                                    đối với sức khỏe phụ nữ toàn cầu
+                                </p>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-12">
+                                <div className="text-center scroll-animate">
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-white/20">
+                                        <div className="text-8xl font-bold text-red-300 mb-4">
+                                            2.3M
+                                        </div>
+                                        <div className="text-2xl font-bold text-white mb-3">
+                                            CA MẮC MỚI
+                                        </div>
+                                        <p className="text-red-100 text-lg">
+                                            2,3 triệu ca ung thư vú mới được ghi
+                                            nhận trên toàn thế giới
+                                        </p>
+                                        <div className="mt-6 bg-red-500/20 rounded-xl p-4">
+                                            <div className="text-3xl font-bold text-red-200">
+                                                ≈ 6.300
+                                            </div>
+                                            <div className="text-red-100">
+                                                ca mắc mới mỗi ngày
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    className="text-center scroll-animate"
+                                    style={{ animationDelay: "0.3s" }}
+                                >
+                                    <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-12 shadow-xl border border-white/20">
+                                        <div className="text-8xl font-bold text-red-300 mb-4">
+                                            670K
+                                        </div>
+                                        <div className="text-2xl font-bold text-white mb-3">
+                                            TỬ VONG
+                                        </div>
+                                        <p className="text-red-100 text-lg">
+                                            670.000 người tử vong vì ung thư vú
+                                            trong năm 2022
+                                        </p>
+                                        <div className="mt-6 bg-red-500/20 rounded-xl p-4">
+                                            <div className="text-3xl font-bold text-red-200">
+                                                ≈ 1.836
+                                            </div>
+                                            <div className="text-red-100">
+                                                ca tử vong mỗi ngày
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                className="text-center mt-12 scroll-animate"
+                                style={{ animationDelay: "0.6s" }}
+                            >
+                                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-2xl mx-auto">
+                                    <h3 className="text-2xl font-bold text-white mb-4">
+                                        Tỷ lệ tử vong
+                                    </h3>
+                                    <div className="text-5xl font-bold text-red-300 mb-2">
+                                        29%
+                                    </div>
+                                    <p className="text-red-100 text-lg">
+                                        Gần 1 trong 3 ca mắc ung thư vú dẫn đến
+                                        tử vong
+                                    </p>
+                                    <div className="mt-6 text-yellow-200 font-semibold text-xl">
+                                        ⚠️ Phát hiện sớm có thể cứu sống hàng
+                                        triệu người
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* CTA Section - Cải tiến */}
+                <section className="py-20 scroll-animate">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-16 shadow-2xl">
+                            <h2 className="text-4xl font-bold text-white mb-6">
+                                Đừng để quá muộn
+                            </h2>
+                            <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
+                                Hãy bắt đầu tầm soát ngay hôm nay để bảo vệ sức
+                                khỏe của bạn và những người thân yêu
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                                <button
+                                    onClick={() =>
+                                        (window.location.href = "/screening")
+                                    }
+                                    className="bg-white text-blue-600 px-12 py-5 rounded-2xl text-xl font-bold hover:bg-gray-100 transform hover:scale-105 transition duration-300 shadow-xl"
+                                >
+                                    Bắt Đầu Tầm Soát Ngay
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        (window.location.href = "/register")
+                                    }
+                                    className="border-3 border-white text-white px-12 py-5 rounded-2xl text-xl font-bold hover:bg-white hover:text-blue-600 transform hover:scale-105 transition duration-300"
+                                >
+                                    Đăng Ký (Bác Sĩ)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer - Cải tiến */}
+                <footer className="bg-blue-900/95 backdrop-blur-sm text-white py-16">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="grid md:grid-cols-4 gap-8">
+                            <div className="md:col-span-2">
+                                <div className="flex items-center mb-6">
+                                    <div className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-full p-3 mr-3">
+                                        <svg
+                                            className="h-8 w-8 text-white"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                        >
+                                            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-2xl font-bold">
+                                        MammoAI
+                                    </span>
+                                </div>
+                                <p className="text-blue-200 text-lg mb-6 max-w-md">
+                                    Hệ thống hỗ trợ tầm soát ung thư vú, giúp
+                                    phát hiện sớm và điều trị kịp thời. Vì sức
+                                    khỏe là tài sản quý giá nhất.
+                                </p>
+                                <div className="flex space-x-4">
+                                    <div className="bg-blue-800 p-3 rounded-full hover:bg-blue-700 transition duration-300 cursor-pointer">
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                                        </svg>
+                                    </div>
+                                    <div className="bg-blue-800 p-3 rounded-full hover:bg-blue-700 transition duration-300 cursor-pointer">
+                                        <svg
+                                            className="w-5 h-5"
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 className="text-xl font-bold mb-6">
+                                    Liên Kết
+                                </h4>
+                                <ul className="space-y-3">
+                                    <li>
+                                        <Link
+                                            to="/"
+                                            className="text-blue-200 hover:text-white transition duration-300 text-lg"
+                                        >
+                                            Trang chủ
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/screening"
+                                            className="text-blue-200 hover:text-white transition duration-300 text-lg"
+                                        >
+                                            Tầm soát ung thư
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/login"
+                                            className="text-blue-200 hover:text-white transition duration-300 text-lg"
+                                        >
+                                            Đăng nhập (Bác sĩ)
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
+                                            to="/register"
+                                            className="text-blue-200 hover:text-white transition duration-300 text-lg"
+                                        >
+                                            Đăng ký (Bác sĩ)
+                                        </Link>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 className="text-xl font-bold mb-6">
+                                    Liên Hệ
+                                </h4>
+                                <div className="space-y-3 text-blue-200 text-lg">
+                                    <p>📧 info@mammoai.com</p>
+                                    <p>📞 1900-xxxx</p>
+                                    <p>📍 Hà Nội, Việt Nam</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="border-t border-blue-800 mt-12 pt-8 text-center">
+                            <p className="text-blue-300 text-lg">
+                                &copy; 2025 MammoAI. Tất cả quyền được bảo lưu.
+                            </p>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
     );
 };

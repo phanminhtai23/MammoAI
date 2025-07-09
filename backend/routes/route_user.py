@@ -104,13 +104,16 @@ async def send_verification_code(data: SendVerificationCode):
 
     return {"status": 200, "message": "Mã xác thực đã được gửi đến email"}
 
+
+#verify mã xác nhận đăng ký tài khoản
 @router.post("/verify-code")
 async def verify_code(data: VerifyCode):
     """
     Xác thực mã xác thực
     """
+    print("data:", data)
     # Kiểm tra mã xác thực có tồn tại không
-    verification_code = await verification_codes_collection.find_one({"email": data.email, "code": data.code})
+    verification_code = await verification_codes_collection.find_one({"email": data.email})
 
     if not verification_code:
         raise HTTPException(
@@ -129,14 +132,14 @@ async def verify_code(data: VerifyCode):
     if expires_at < now:
         raise HTTPException(
             status_code=400,
-            detail="Mã xác thực đã hết hạn"
+            detail="Mã xác nhận đã hết hạn"
         )
 
     # so sánh mã xác thực
     if verification_code["code"] != data.code:
         raise HTTPException(
             status_code=400,
-            detail="Mã xác thực không hợp lệ"
+            detail="Mã xác nhận không chính xác"
         )
 
     # Mã xác thực hợp lệ, xóa mã xác thực cũ

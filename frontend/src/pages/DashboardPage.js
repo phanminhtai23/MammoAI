@@ -17,6 +17,8 @@ import {
 import { message } from "antd";
 import userService from "../services/userService";
 import { useNavigate } from "react-router-dom";
+import avt_admin from "../assets/avt_admin.png";
+
 
 const AdminDashboard = ({ avatarUrl, userName }) => {
     const [selectedKey, setSelectedKey] = useState("1");
@@ -25,7 +27,7 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
     const navigate = useNavigate();
 
     // Avatar và tên mặc định nếu không truyền vào
-    const displayAvatar = avatarUrl || "https://ui-avatars.com/api/?name=Admin";
+    const displayAvatar = avatarUrl || avt_admin;
     const displayName = userName || "Admin";
 
     const renderContent = () => {
@@ -70,12 +72,12 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
         <div
             className={`flex min-h-screen ${
                 darkMode ? "bg-gray-900" : "bg-[#f6f8fa]"
-            }`}
+            }  `}
         >
             {/* Sidebar */}
             <div
                 className={`transition-all duration-300 ${
-                    sidebarOpen ? "w-64" : "w-16"
+                    sidebarOpen ? "w-60" : "w-16"
                 } ${
                     darkMode
                         ? "bg-gray-800 border-gray-700"
@@ -109,7 +111,7 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
                     >
                         {sidebarOpen ? (
                             <ChevronLeft
-                                size={24}
+                                size={25}
                                 className={
                                     darkMode ? "text-white" : "text-gray-700"
                                 }
@@ -276,12 +278,12 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
                 </div>
                 {/* Logout Section */}
                 <div
-                    className={`p-4 border-t border-gray-200 dark:border-gray-700 ${
+                    className={`p-3 border-t border-gray-200 dark:border-gray-700 ${
                         !sidebarOpen ? "flex items-center justify-center" : ""
                     }`}
                 >
                     <button
-                        className={`flex items-center w-full p-3 rounded-lg transition-all duration-200
+                        className={`flex items-center w-full p-2 rounded-lg transition-all duration-200
                             ${
                                 sidebarOpen
                                     ? "hover:bg-gray-200 hover:text-black dark:hover:bg-gray-600 dark:hover:text-white text-gray-700 dark:text-gray-200"
@@ -293,7 +295,7 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
                                 ? {
                                       justifyContent: "center",
                                       width: "48px",
-                                      height: "48px",
+                                      height: "30px",
                                       margin: "0 auto",
                                   }
                                 : {}
@@ -324,7 +326,7 @@ const AdminDashboard = ({ avatarUrl, userName }) => {
                     darkMode ? "bg-gray-900" : "bg-[#f6f8fa]"
                 } flex flex-col`}
             >
-                <main className="p-6 flex-grow">{renderContent()}</main>
+                <main className="flex-grow">{renderContent()}</main>
             </div>
         </div>
     );

@@ -11,7 +11,7 @@ const PrivateRoute = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(null);
 
     useEffect(() => {
-        const verifyToken = async () => {
+        const verifyToken = async () => {   
             const token = localStorage.getItem("token");
             if (!token) {
                 setIsAuthenticated(false);
