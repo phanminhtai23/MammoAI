@@ -3,231 +3,324 @@
     "session_id": "sess_001_2025_04_15",
     "user_id": "e881d165-b6e5-4538-a2c6-a8690b3496c4",
     "login_at": "2025-04-15T08:30:15.413Z",
+    "expires_at": "2025-04-16T08:30:15.413Z",
     "logout_at": "2025-04-15T10:45:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_002_2025_04_20",
     "user_id": "f992e276-c7f6-4649-b3d7-b9791c4597d5",
     "login_at": "2025-04-20T09:15:30.413Z",
+    "expires_at": "2025-04-21T09:15:30.413Z",
     "logout_at": "2025-04-20T11:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_003_2025_04_25",
     "user_id": "a103f387-d8g7-5750-c4e8-c0802d5608e6",
     "login_at": "2025-04-25T14:22:45.413Z",
+    "expires_at": "2025-04-26T14:22:45.413Z",
     "logout_at": "2025-04-25T16:50:12.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_004_2025_05_05",
     "user_id": "c325h509-f0i9-7972-e6g0-e2024f7820g8",
     "login_at": "2025-05-05T09:12:33.413Z",
+    "expires_at": "2025-05-06T09:12:33.413Z",
     "logout_at": "2025-05-05T12:25:18.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_005_2025_05_10",
     "user_id": "d436i610-g1j0-8083-f7h1-f3135g8931h9",
     "login_at": "2025-05-10T11:25:18.413Z",
+    "expires_at": "2025-05-11T11:25:18.413Z",
     "logout_at": "2025-05-10T14:40:33.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_006_2025_05_15",
     "user_id": "g769l943-j4m3-1316-i0k4-i6468j1264k2",
     "login_at": "2025-05-15T08:15:29.413Z",
+    "expires_at": "2025-05-16T08:15:29.413Z",
     "logout_at": "2025-05-15T11:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_007_2025_05_20",
     "user_id": "h870m054-k5n4-2427-j1l5-j7579k2375l3",
     "login_at": "2025-05-20T10:28:41.413Z",
+    "expires_at": "2025-05-21T10:28:41.413Z",
     "logout_at": "2025-05-20T13:45:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_008_2025_05_25",
     "user_id": "k103p387-n8q7-5750-m4o8-m0912n5608o6",
     "login_at": "2025-05-25T16:08:17.413Z",
+    "expires_at": "2025-05-26T16:08:17.413Z",
     "logout_at": "2025-05-25T19:25:33.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_009_2025_06_02",
     "user_id": "l214q498-o9r8-6861-n5p9-n1023o6719p7",
     "login_at": "2025-06-02T09:21:29.413Z",
+    "expires_at": "2025-06-03T09:21:29.413Z",
     "logout_at": "2025-06-02T12:40:18.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_010_2025_06_05",
     "user_id": "p658u832-s3v2-0205-r9t3-r5467s0153t1",
     "login_at": "2025-06-05T08:14:17.413Z",
+    "expires_at": "2025-06-06T08:14:17.413Z",
     "logout_at": "2025-06-05T11:35:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_011_2025_06_10",
     "user_id": "q769v943-t4w3-1316-s0u4-s6578t1264u2",
     "login_at": "2025-06-10T10:27:29.413Z",
+    "expires_at": "2025-06-11T10:27:29.413Z",
     "logout_at": "2025-06-10T13:50:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_012_2025_06_15",
     "user_id": "t092y276-w7z6-4649-v3x7-v9801w4597x5",
     "login_at": "2025-06-15T16:07:05.413Z",
+    "expires_at": "2025-06-16T16:07:05.413Z",
     "logout_at": "2025-06-15T19:20:12.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_013_2025_06_20",
     "user_id": "u103z387-x8a7-5750-w4y8-w0912x5608y6",
     "login_at": "2025-06-20T09:20:17.413Z",
+    "expires_at": "2025-06-21T09:20:17.413Z",
     "logout_at": "2025-06-20T12:45:33.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_014_2025_06_25",
     "user_id": "x436c610-a1d0-8083-z7b1-z3245a8931b9",
     "login_at": "2025-06-25T15:59:53.413Z",
+    "expires_at": "2025-06-26T15:59:53.413Z",
     "logout_at": "2025-06-25T19:15:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_015_2025_07_01",
     "user_id": "f992e276-c7f6-4649-b3d7-b9791c4597d5",
     "login_at": "2025-07-01T08:30:15.413Z",
+    "expires_at": "2025-07-02T08:30:15.413Z",
     "logout_at": "2025-07-01T12:45:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_016_2025_07_01",
     "user_id": "a103f387-d8g7-5750-c4e8-c0802d5608e6",
     "login_at": "2025-07-01T10:15:30.413Z",
+    "expires_at": "2025-07-02T10:15:30.413Z",
     "logout_at": "2025-07-01T14:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_017_2025_07_02",
     "user_id": "b214g498-e9h8-6861-d5f9-d1913e6719f7",
     "login_at": "2025-07-02T14:22:45.413Z",
+    "expires_at": "2025-07-03T14:22:45.413Z",
     "logout_at": "2025-07-02T18:50:12.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_018_2025_07_03",
     "user_id": "c325h509-f0i9-7972-e6g0-e2024f7820g8",
     "login_at": "2025-07-03T09:12:33.413Z",
+    "expires_at": "2025-07-04T09:12:33.413Z",
     "logout_at": "2025-07-03T13:25:18.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_019_2025_07_04",
     "user_id": "d436i610-g1j0-8083-f7h1-f3135g8931h9",
     "login_at": "2025-07-04T11:25:18.413Z",
+    "expires_at": "2025-07-05T11:25:18.413Z",
     "logout_at": "2025-07-04T15:40:33.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_020_2025_07_05",
     "user_id": "e547j721-h2k1-9194-g8i2-g4246h9042i0",
     "login_at": "2025-07-05T08:15:29.413Z",
+    "expires_at": "2025-07-06T08:15:29.413Z",
     "logout_at": "2025-07-05T12:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_021_2025_07_06",
     "user_id": "f658k832-i3l2-0205-h9j3-h5357i0153j1",
     "login_at": "2025-07-06T10:28:41.413Z",
+    "expires_at": "2025-07-07T10:28:41.413Z",
     "logout_at": "2025-07-06T14:45:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_022_2025_07_07",
     "user_id": "g769l943-j4m3-1316-i0k4-i6468j1264k2",
     "login_at": "2025-07-07T16:08:17.413Z",
+    "expires_at": "2025-07-08T16:08:17.413Z",
     "logout_at": "2025-07-07T20:25:33.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_023_2025_07_08",
     "user_id": "h870m054-k5n4-2427-j1l5-j7579k2375l3",
     "login_at": "2025-07-08T09:21:29.413Z",
+    "expires_at": "2025-07-09T09:21:29.413Z",
     "logout_at": "2025-07-08T13:40:18.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_024_2025_07_09",
     "user_id": "i981n165-l6o5-3538-k2m6-k8690l3486m4",
     "login_at": "2025-07-09T08:14:17.413Z",
+    "expires_at": "2025-07-10T08:14:17.413Z",
     "logout_at": "2025-07-09T12:35:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_025_2025_07_09",
     "user_id": "j092o276-m7p6-4649-l3n7-l9801m4597n5",
     "login_at": "2025-07-09T10:27:29.413Z",
+    "expires_at": "2025-07-10T10:27:29.413Z",
     "logout_at": "2025-07-09T14:50:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_026_2025_07_09",
     "user_id": "k103p387-n8q7-5750-m4o8-m0912n5608o6",
     "login_at": "2025-07-09T16:07:05.413Z",
+    "expires_at": "2025-07-10T16:07:05.413Z",
     "logout_at": null,
-    "is_active": true
+    "is_active": true,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_027_2025_07_09",
     "user_id": "l214q498-o9r8-6861-n5p9-n1023o6719p7",
     "login_at": "2025-07-09T09:20:17.413Z",
+    "expires_at": "2025-07-10T09:20:17.413Z",
     "logout_at": null,
-    "is_active": true
+    "is_active": true,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_028_2025_06_30",
     "user_id": "m325r509-p0s9-7972-o6q0-o2134p7820q8",
     "login_at": "2025-06-30T11:14:15.413Z",
+    "expires_at": "2025-07-01T11:14:15.413Z",
     "logout_at": "2025-06-30T15:25:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_029_2025_06_28",
     "user_id": "n436s610-q1t0-8083-p7r1-p3245q8931r9",
     "login_at": "2025-06-28T08:30:15.413Z",
+    "expires_at": "2025-06-29T08:30:15.413Z",
     "logout_at": "2025-06-28T12:45:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_030_2025_06_26",
     "user_id": "o547t721-r2u1-9194-q8s2-q4356r9042s0",
     "login_at": "2025-06-26T10:15:30.413Z",
+    "expires_at": "2025-06-27T10:15:30.413Z",
     "logout_at": "2025-06-26T14:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
   },
   {
     "session_id": "sess_031_2025_05_30",
     "user_id": "p658u832-s3v2-0205-r9t3-r5467s0153t1",
     "login_at": "2025-05-30T14:22:45.413Z",
+    "expires_at": "2025-05-31T14:22:45.413Z",
     "logout_at": "2025-05-30T18:50:12.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "google"
   },
   {
     "session_id": "sess_032_2025_05_28",
     "user_id": "y547d721-b2e1-9194-a8c2-a4356b9042c0",
     "login_at": "2025-05-28T11:14:15.413Z",
+    "expires_at": "2025-05-29T11:14:15.413Z",
     "logout_at": "2025-05-28T15:25:22.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "facebook"
   },
   {
     "session_id": "sess_033_2025_04_30",
     "user_id": "q769v943-t4w3-1316-s0u4-s6578t1264u2",
     "login_at": "2025-04-30T09:12:33.413Z",
+    "expires_at": "2025-05-01T09:12:33.413Z",
     "logout_at": "2025-04-30T13:30:45.413Z",
-    "is_active": false
+    "is_active": false,
+    "auth_provider": "local"
+  },
+  {
+    "session_id": "sess_034_2025_07_09",
+    "user_id": "z658m832-d4f3-2316-c0e4-c6579d2375e5",
+    "login_at": "2025-07-09T18:45:10.413Z",
+    "expires_at": "2025-07-10T18:45:10.413Z",
+    "logout_at": null,
+    "is_active": true,
+    "auth_provider": "google"
+  },
+  {
+    "session_id": "sess_035_2025_07_08",
+    "user_id": "a769n943-e5g4-3427-d1f5-d7680e3486f6",
+    "login_at": "2025-07-08T22:30:25.413Z",
+    "expires_at": "2025-07-09T22:30:25.413Z",
+    "logout_at": null,
+    "is_active": true,
+    "auth_provider": "local"
+  },
+  {
+    "session_id": "sess_036_2025_07_07",
+    "user_id": "b870o054-f6h5-4538-e2g6-e8791f4597g7",
+    "login_at": "2025-07-07T20:15:45.413Z",
+    "expires_at": "2025-07-08T20:15:45.413Z",
+    "logout_at": null,
+    "is_active": true,
+    "auth_provider": "facebook"
   }
 ] 

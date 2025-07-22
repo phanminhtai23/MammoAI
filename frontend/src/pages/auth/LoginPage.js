@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Input, Button, message, Modal, Alert } from "antd";
 import {
     GoogleOutlined,
@@ -11,14 +11,30 @@ import { useNavigate, Link } from "react-router-dom";
 import userService from "../../services/userService";
 import { useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "@greatsumini/react-facebook-login";
-
-
+import { isAuthenticated, getUserInfo } from "../../utils/auth";
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [errorVisible, setErrorVisible] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+
+    // Auto redirect nếu đã đăng nhập
+    useEffect(() => {
+        if (isAuthenticated()) {
+            const userInfo = getUserInfo();
+            message.success(
+                `Chào mừng trở lại, ${userInfo?.name || userInfo?.email}!`
+            );
+
+            // Redirect dựa trên role
+            if (userInfo?.role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/home");
+            }
+        }
+    }, [navigate]);
 
     // Handle Google login
     const loginGoogle = useGoogleLogin({
@@ -29,6 +45,8 @@ const LoginPage = () => {
                 });
                 console.log("response:", response);
                 localStorage.setItem("token", response.data.access_token);
+                // Trigger storage event để cập nhật navigation
+                window.dispatchEvent(new Event("storage"));
                 if (response.data.user.role === "admin") {
                     navigate("/dashboard");
                 } else {
@@ -62,7 +80,6 @@ const LoginPage = () => {
     // Handle Facebook login
     const handleFacebookLogin = async (res) => {
         try {
-            
             // console.log("accessToken:", res);
             const response = await userService.facebookLogin({
                 token: res.accessToken,
@@ -70,6 +87,8 @@ const LoginPage = () => {
             console.log("response:", response);
 
             localStorage.setItem("token", response.data.access_token);
+            // Trigger storage event để cập nhật navigation
+            window.dispatchEvent(new Event("storage"));
             if (response.data.user.role === "admin") {
                 navigate("/dashboard");
             } else {
@@ -107,6 +126,8 @@ const LoginPage = () => {
             });
 
             localStorage.setItem("token", response.data.access_token);
+            // Trigger storage event để cập nhật navigation
+            window.dispatchEvent(new Event("storage"));
             if (response.data.user.role === "admin") {
                 navigate("/dashboard");
             } else {
@@ -134,7 +155,6 @@ const LoginPage = () => {
             } else if (error.message) {
                 message.error(error.message, 2);
             }
-            
         } finally {
             setLoading(false);
         }

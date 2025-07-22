@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  mammo-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mammo-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persistent model cache - models sẽ không bị mất khi restart
+      - model_cache:/app/model_cache
+      # Mount logs (optional)
+      - ./logs:/app/logs
+    environment:
+      # Model AI settings
+      - MODEL_CACHE_DIR=/app/model_cache
+      - MODEL_CACHE_PERSISTENT=true
+      
+      # Database settings (adjust as needed)
+      - MONGODB_URL=mongodb://mongo:27017/mammoai
+      
+      # AWS S3 settings (for model downloads)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      
+      # Memory optimization
+      - PYTHONUNBUFFERED=1
+      - TORCH_HOME=/app/model_cache/torch
+    networks:
+      - mammo-network
+    depends_on:
+      - mongo
+    # Memory limit cho Docker container
+    mem_limit: 4g
+    memswap_limit: 4g
+    
+  mongo:
+    image: mongo:5.0
+    container_name: mammo-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - mammo-network
+
+  # Frontend (optional)
+  mammo-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mammo-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    networks:
+      - mammo-network
+    depends_on:
+      - mammo-backend
+
+volumes:
+  # Persistent volumes
+  model_cache:
+    driver: local
+  mongodb_data:
+    driver: local
+
+networks:
+  mammo-network:
+    driver: bridge 

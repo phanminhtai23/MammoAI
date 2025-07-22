@@ -3,6 +3,7 @@ import backgroundImage from "../assets/background_home.jpg";
 import HomeNavigateComponent from "../components/Home/HomeNavigateComponent";
 import ContentComponent from "../components/Home/ContentComponent";
 import ScreeningComponent from "../components/Home/ScreeningComponent";
+import DoctorComponent from "../components/Home/DoctorComponent";
 
 const HomePage = () => {
     const [activeTab, setActiveTab] = useState("home");
@@ -32,6 +33,7 @@ const HomePage = () => {
                 {activeTab === "screening" && (
                     <ScreeningComponent setActiveTab={setActiveTab} />
                 )}
+                {activeTab === "prediction" && <DoctorComponent />}
             </div>
         </div>
     );

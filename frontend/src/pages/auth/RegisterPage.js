@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Input, Button, message } from "antd";
 import {
     GoogleOutlined,
@@ -11,10 +11,26 @@ import { useNavigate, Link } from "react-router-dom";
 import userService from "../../services/userService";
 import { useGoogleLogin } from "@react-oauth/google";
 import FacebookLogin from "@greatsumini/react-facebook-login";
+import { isAuthenticated, getUserInfo } from "../../utils/auth";
 
 const RegisterPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+    // Auto redirect nếu đã đăng nhập
+    useEffect(() => {
+        if (isAuthenticated()) {
+            const userInfo = getUserInfo();
+            message.info(`Bạn đã đăng nhập rồi, ${userInfo?.name || userInfo?.email}!`);
+            
+            // Redirect dựa trên role
+            if (userInfo?.role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/home");
+            }
+        }
+    }, [navigate]);
 
     // Handle Google login
     const registerGoogle = useGoogleLogin({

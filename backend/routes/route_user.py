@@ -7,21 +7,33 @@ from fastapi.encoders import jsonable_encoder
 import uuid
 from datetime import datetime, timezone, timedelta  # Thêm timedelta vào import
 from database import verification_codes_collection
-from utils.send_mail import send_verification_email, generate_verification_code, send_forgot_password_email
+# from utils.send_mail import send_verification_email, generate_verification_code, send_forgot_password_email
+from services.send_mail import mail_service, generate_verification_code
 from config import VERIFICATION_CODE_EXPIRE_MINUTES, FRONTEND_URL, GOOGLE_AUTH_URL
 
 router = APIRouter()
 
 # Helper function để tạo user session
-async def create_user_session(user_id: str, auth_provider: str = "local"):
+async def create_user_session(user_id: str, auth_provider: str = "local", session_hours: int = 1):
     """
     Tạo session mới cho user khi đăng nhập
+    
+    Args:
+        user_id: ID của user
+        auth_provider: Loại đăng nhập (local/google/facebook)
+        session_hours: Số giờ session có hiệu lực (mặc định 1 giờ)
     """
     session_id = str(uuid.uuid4())
+    vietnam_tz = timezone(timedelta(hours=7))
+    now = datetime.now(vietnam_tz)
+    expires_at = now + timedelta(hours=session_hours)
+    
+    print("expires_at: ", expires_at)
     session_data = {
         "session_id": session_id,
         "user_id": user_id,
-        "login_at": datetime.now(timezone.utc),
+        "login_at": now,
+        "expires_at": expires_at,  # Thời gian hết hạn session
         "logout_at": None,
         "is_active": True,
         "auth_provider": auth_provider
@@ -29,9 +41,10 @@ async def create_user_session(user_id: str, auth_provider: str = "local"):
     
     try:
         await users_session_collection.insert_one(session_data)
+        print(f"✅ Tạo session: {session_id} (hết hạn: {expires_at})")
         return session_id
     except Exception as e:
-        print(f"Lỗi khi tạo session: {str(e)}")
+        print(f"❌ Lỗi khi tạo session: {str(e)}")
         return None
 
 # Helper function để cập nhật session khi logout
@@ -130,7 +143,7 @@ async def send_verification_code(data: SendVerificationCode):
     verification_code = generate_verification_code()
 
 
-    # Lưu mã xác thực vào database
+    # Lưu mã xác thực
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=VERIFICATION_CODE_EXPIRE_MINUTES)
     print("expires_at luu vao databaste:", expires_at)
     await verification_codes_collection.insert_one({
@@ -142,7 +155,7 @@ async def send_verification_code(data: SendVerificationCode):
 
     #Gửi mail
     expires_at_vn = expires_at.astimezone(timezone(timedelta(hours=7)))
-    send_verification_email(data.email, verification_code, expires_at_vn)
+    mail_service.send_verification_email(data.email, verification_code, expires_at_vn)
 
     return {"status": 200, "message": "Mã xác thực đã được gửi đến email"}
 
@@ -239,11 +252,14 @@ async def login(user: LoginRequest):
         data={
             "sub": db_user["email"],
             "user_id": db_user["id"],
+            "name": db_user["name"],
             "role": db_user["role"],
             "session_id": session_id
         }
     )
     
+    print("access_token: ", access_token)
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -276,9 +292,12 @@ async def forgot_password(data: SendVerificationCode):
         }
     )
 
+    expires_at_1 = datetime.now(timezone.utc) + timedelta(minutes=VERIFICATION_CODE_EXPIRE_MINUTES)
+    expires_at_vn = expires_at_1.astimezone(timezone(timedelta(hours=7)))
+    
     reset_password_url = f"{FRONTEND_URL}/reset-password?token={token}"
     print("reset_password_url:", reset_password_url)
-    send_forgot_password_email(data.email, token, expires_at, reset_password_url)
+    mail_service.send_forgot_password_email(data.email, token, expires_at_vn, reset_password_url)
 
     return {"status": 200, "message": "Email đã được gửi đến"}
 
@@ -416,6 +435,7 @@ async def google_login(req: GoogleLoginRequest):
                 data={
                     "sub": user_data["id"],
                     "user_id": user_data["id"],
+                    "name": user_data["name"],
                     "role": user_data["role"],
                     "auth_provider": user_data["auth_provider"],
                     "session_id": session_id
@@ -447,6 +467,7 @@ async def google_login(req: GoogleLoginRequest):
                 data={
                     "sub": db_user["id"],
                     "user_id": db_user["id"],
+                    "name": db_user["name"],
                     "role": db_user["role"],
                     "auth_provider": db_user["auth_provider"],
                     "session_id": session_id
@@ -504,6 +525,7 @@ async def facebook_login(req: FacebookLoginRequest):
                 data={
                     "sub": user_data["id"],
                     "user_id": user_data["id"],
+                    "name": user_data["name"],
                     "role": user_data["role"],
                     "auth_provider": user_data["auth_provider"],
                     "session_id": session_id
@@ -535,6 +557,7 @@ async def facebook_login(req: FacebookLoginRequest):
                 data={
                     "sub": db_user["id"],
                     "user_id": db_user["id"],
+                    "name": db_user["name"],
                     "role": db_user["role"],
                     "auth_provider": db_user["auth_provider"],
                     "session_id": session_id

@@ -4,7 +4,7 @@ from schemas.user import UserResponse, UserUpdate
 from utils.security import get_current_user, check_admin_role
 from fastapi.encoders import jsonable_encoder
 from typing import Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import math
 
 router = APIRouter()
@@ -378,11 +378,17 @@ async def get_traffic_overview(
         
         # Thống kê cơ bản
         total_users = await users_collection.count_documents({})
-        online_users = await users_session_collection.count_documents({"is_active": True})
-        print(f"📊 Total users: {total_users}, Online: {online_users}")
+        
+        # Đếm online users: sessions còn hạn (expires_at > now) và is_active = True
+        vietnam_tz = timezone(timedelta(hours=7))
+        now = datetime.now(vietnam_tz)
+        online_users = await users_session_collection.count_documents({
+            "is_active": True,
+            "expires_at": {"$gt": now}
+        })
+        print(f"📊 Total users: {total_users}, Online users (còn hạn): {online_users}")
         
         # User mới tháng này với múi giờ Việt Nam
-        from datetime import timezone, timedelta
         vietnam_tz = timezone(timedelta(hours=7))
         now = datetime.now(vietnam_tz)
         start_of_month = datetime(now.year, now.month, 1)
@@ -465,7 +471,6 @@ async def get_new_users_by_month(
     
     try:
         # Tính toán với múi giờ Việt Nam (+7)
-        from datetime import timezone, timedelta
         vietnam_tz = timezone(timedelta(hours=7))
         now = datetime.now(vietnam_tz)
         

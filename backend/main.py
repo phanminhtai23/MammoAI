@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from routes.route_user import router as users_router
 from routes.route_admin import router as admin_router
 from routes.route_email import router as email_router
+from routes.route_model import router as model_router
 # from routes.drugs import router as drugs_router
 # from routes.ddi import router as ddi_router
 import uvicorn
@@ -40,6 +41,7 @@ origins = [
     "https://localhost:3005",
     "https://localhost:3006",
     FRONTEND_URL,
+    "*",
 ]
 
 app = FastAPI()
@@ -55,6 +57,7 @@ app.add_middleware(
 app.include_router(users_router, prefix="/user", tags=["User"])
 app.include_router(email_router, prefix="/email", tags=["Email"])
 app.include_router(admin_router, prefix="/admin", tags=["Admin"])
+app.include_router(model_router, prefix="/model", tags=["Model"])
 # app.include_router(drugs_router, prefix="/drugs", tags=["Drugs"])
 # app.include_router(ddi_router, prefix="/ddi", tags=["DDI"])
 

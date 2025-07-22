@@ -25,7 +25,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if payload is None:
         return None
     else:
-        print("payload: ", payload)
+        # print("payload: ", payload)
         return payload
 
 def check_admin_role(user: dict):
